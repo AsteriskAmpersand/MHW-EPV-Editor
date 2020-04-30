@@ -12,8 +12,12 @@ class CompositeUndo():
         self.undoActions = Stack()
     def __call__(self):
         self.do()
-    def addAction(self,func,param,undo,uparam):
-        self.redoActions.put((func,param))
-        self.undoAction.put((undo,uparam))
-    def do(self):
-        pass
+    def addAction(self,undoF,uparam,redoF,param):
+        self.redoActions.put((redoF,param))
+        self.undoActions.put((undoF,uparam))
+        #print(uparam)
+    def do(self,source):
+        for f,p in source.consume():
+            f(*p)
+    def undo(self):self.do(self.undoActions)
+    def redo(self):self.do(self.redoActions)

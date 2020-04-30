@@ -143,6 +143,9 @@ class QList (QtCore.QAbstractListModel):
     def __contains__(self, val):
         return val in self.list
     
+    def find(self,val):
+        return self.list.index(val)
+    
     def append(self, val):
         self.list.append(val)
         

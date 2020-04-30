@@ -52,16 +52,15 @@
     </property>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
-    <addaction name="actionDelete"/>
     <addaction name="separator"/>
+    <addaction name="actionCopy"/>
+    <addaction name="actionPaste"/>
+    <addaction name="actionDelete"/>
     <addaction name="actionDuplicate"/>
-    <addaction name="actionCopy_Entry"/>
-    <addaction name="actionPaste_Entry"/>
     <addaction name="actionCopy_Properties"/>
     <addaction name="actionPaste_Properties"/>
     <addaction name="separator"/>
     <addaction name="actionPush_To_Copy_Stack"/>
-    <addaction name="actionPop_Copy_Stack"/>
     <addaction name="actionPaste_Copy_Stack"/>
     <addaction name="actionClear_Copy_Stack"/>
     <addaction name="separator"/>
@@ -189,20 +188,20 @@
     <string>Scripting</string>
    </property>
   </action>
-  <action name="actionCopy_Entry">
+  <action name="actionCopy">
    <property name="text">
-    <string>Copy Entry</string>
+    <string>Copy</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Shift+C</string>
+    <string>Ctrl+C</string>
    </property>
   </action>
-  <action name="actionPaste_Entry">
+  <action name="actionPaste">
    <property name="text">
-    <string>Paste Entry</string>
+    <string>Paste</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Shift+V</string>
+    <string>Ctrl+V</string>
    </property>
   </action>
   <action name="actionCopy_Properties">
@@ -210,7 +209,7 @@
     <string>Copy Properties</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Alt+C</string>
+    <string>Ctrl+Shift+C</string>
    </property>
   </action>
   <action name="actionPaste_Properties">
@@ -218,7 +217,7 @@
     <string>Paste Properties</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Alt+V</string>
+    <string>Ctrl+Shift+V</string>
    </property>
   </action>
   <action name="actionReplace">
@@ -262,6 +261,9 @@
    <property name="text">
     <string>Push To Copy Stack</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+C</string>
+   </property>
   </action>
   <action name="actionPop_Copy_Stack">
    <property name="text">
@@ -272,10 +274,16 @@
    <property name="text">
     <string>Paste Copy Stack</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+V</string>
+   </property>
   </action>
   <action name="actionClear_Copy_Stack">
    <property name="text">
     <string>Clear Copy Stack</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+Z</string>
    </property>
   </action>
   <action name="actionDelete">

@@ -16,7 +16,7 @@ from structs.epv import EPVExtraneousProperties
 from gui.Forms import SelectForm
 from gui.FileTab import Ui_Form
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog, QApplication
 _translate = QtCore.QCoreApplication.translate
 
 def functionChain(functionList):
@@ -164,6 +164,10 @@ class EPVTab(QtWidgets.QWidget):
     def disableGroup(self): self.toggleGroup(False)
     def enableGroup(self): self.toggleGroup(True)
     
+# =============================================================================
+# Main - Edit Functionality
+# =============================================================================
+    
     def actionPushed(self,responsible):
         self.changed = True
         self.undoStack.append(responsible)
@@ -184,6 +188,30 @@ class EPVTab(QtWidgets.QWidget):
         while(not self.redoQueue.empty()):
             responsible = self.redoQueue.get()
             responsible.clearRedoQueue()
+            
+    def delete(self):self.EPVModel.removeRows(self.currentIndex().row(),1,self.currentIndex().parent())
+    def duplicate(self):self.currentEntry().duplicate()
+    def copy(self):QApplication.clipboard().setMimeData(self.EPVModel.mimeData([self.currentIndex()]))
+    def paste(self):
+        self.EPVModel.dropMimeData( QApplication.clipboard().mimeData(),
+                                    QtCore.Qt.CopyAction,
+                                    self.currentIndex().row(),
+                                    0,
+                                    self.currentIndex().parent())
+    def copyProperties(self):return self.currentEntry()
+    def pasteProperties(self,clipboard):self.currentEntry().pasteProperties(clipboard)
+    def pushStack(self,mainCopyStack):mainCopyStack.put(self.currentEntry())
+    def pasteStack(self,mainCopyStack):self.EPVModel.pasteStack(self.currentIndex(),mainCopyStack)
+            
+# =============================================================================
+# Main - File Functionality
+# =============================================================================
+    def currentEntry(self):
+        return self.EPVModel.access(self.currentIndex())
+    def currentIndex(self):
+        selection = self.ui.recordBrowser.selectedIndexes()
+        if len(selection)==1:
+            return selection[0]
     def SaveToFile(self,path):
         with open(path,"wb") as outf:
             outf.write(self.EPVModel.serialize())
@@ -197,8 +225,7 @@ class EPVTab(QtWidgets.QWidget):
                 self.path = filename
                 self.tabNameChanged(self,Path(self.path).stem)
                 return True
-        return False
-    
+        return False    
     def Save(self):
         if not self.path:
             return self.SaveAs()

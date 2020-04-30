@@ -9,12 +9,9 @@ from model.Queue import Queue
 
 def startRecording(self):
     self.complexUndo = CompositeUndo(self)
-    
-def addEvent(self,func,param,undofunc,undoparam):
-    self.complexUndo.addAction(func,param,undofunc,undoparam)
-    
+        
 def endRecording(self):
-    self.undoStack.put((self.complexUndo,()))
+    self.undoStack.put((self.complexUndo.undo,(),self.complexUndo.redo,()))
     self.undoableAction.emit(self)
     self.complexUndo = None
     
@@ -23,7 +20,7 @@ def discardRecording(self):
 
 def recordState(self,undoerFunction,undoerParameters,redoFunction,redoParameters):
     if self.complexUndo:
-        self.addEvent(undoerFunction,undoerParameters,redoFunction,redoParameters)
+        self.complexUndo.addAction(undoerFunction,undoerParameters,redoFunction,redoParameters)
     else:
         self.undoStack.put((undoerFunction,undoerParameters,redoFunction,redoParameters))
         self.undoableAction.emit(self)

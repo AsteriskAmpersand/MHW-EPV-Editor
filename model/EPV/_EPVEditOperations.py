@@ -4,16 +4,13 @@ Created on Wed Apr 29 03:27:40 2020
 
 @author: AsteriskAmpersand
 """
-from PyQt5.QtCore import Qt, QMimeData
+from PyQt5.QtCore import Qt, QMimeData, QModelIndex
 from PyQt5.QtWidgets import QMessageBox
 from ._EPVGroup import EPVGroup
 from ._EPVRecord import EPVRecord
+from ._EPVMimeTypes import EPVMETADATA,EPVGROUP,EPVRECORD,BINARY,HEXTEXT
 
-EPVMETADATA = "application/x-mhw-epvmetadata"
-EPVGROUP = "application/x-mhw-epvgroup"
-EPVRECORD = "application/x-mhw-epvrecord"
-BINARY = "application/octet-stream"
-HEXTEXT = "text/plain"
+#TODO - For some reason moving to the top of the list causes an issue
 
 def hexRepresent(binaryData):
     return  ' '.join(list(map(lambda x: "%02X"%x,binaryData)))
@@ -64,19 +61,13 @@ def canDropMimeData(self,data,action,row,column,parent):
          ((row,column) == (-1,-1) and type(parent.internalPointer()) is EPVGroup) or
           (row != -1 and parent.row() != -1 )):
         return False
+    if EPVRECORD in formats and not parent.isValid(): return False
     return any((typing in formats for typing in typings))
-    #if EPVRECORD in 
-    #print("%d:%d || %d:%d - %s"%(row,column,parent.row(),parent.column(),parent.internalPointer()))
-    #if row == -1 and column == -1: Disables moving on top but makes the whole thing SUPER HARD TO MOVE
-    #    return False
+#if EPVRECORD in 
+#print("%d:%d || %d:%d - %s"%(row,column,parent.row(),parent.column(),parent.internalPointer()))
+#if row == -1 and column == -1: Disables moving on top but makes the whole thing SUPER HARD TO MOVE
+#    return False
     
-    # x  0 || -1:-1 None -> Moving before group x
-    # x  0 || y:0 epv -> Moving before record y on group x
-    #-1 -1 || x:0 epv -> Moving ontop of group x
-    #-1 -1 || x:0 epvgroup y -> Moving ontop of record x on epvgroup y
-    #
-    return True
-
 def dropIntoQuery(self,intoType):
     qbox = QMessageBox()
     if intoType is EPVGroup:
@@ -94,47 +85,112 @@ Are you sure you want to do this?""")
         qbox.addButton(QMessageBox.Cancel)
     return qbox
 
-def removeRows(self,*kwargs):
-    print("Oh Lawd")
-    return False
+def removeRows(self,row,count,parent):
+    parentObj = self.access(parent)
+    if not self.movePending:
+        self.startRecording()
+    if type(parentObj) is EPVGroup:
+        op = lambda x: self.deleteRecord(parentObj,x)
+    elif type(parentObj) is type(self):
+        op = self.deleteGroup
+    else: return False
+    if row+count > len(parentObj):return False
+    for ix in range(row,row+count):
+        op(ix)
+    self.endRecording()
+    self.movePending = False
+    return True
 
+def deleteGroup(self,groupIndex):
+    self.recordState(self._insertGroup,[self[groupIndex],groupIndex],self._deleteGroup,[groupIndex])
+    return self._deleteGroup(groupIndex)
+
+def _deleteGroup(self,groupIndex):
+    index = QModelIndex()#self.createIndex(groupIndex,0,self)
+    self.beginRemoveRows(index,groupIndex,groupIndex)    
+    self[groupIndex:groupIndex+1] = []
+    self.endRemoveRows()
+    return True
+
+def _insertGroup(self,group,groupIndex):
+    index = QModelIndex()
+    self.beginInsertRows(index,groupIndex,groupIndex)  
+    group.__parent__ = self
+    self[groupIndex:groupIndex] = [group]
+    self.endInsertRows()
+    return True
+
+def insertGroup(self,group,groupIndex = None):
+    if groupIndex == None:
+        groupIndex = len(self)
+    self.recordState(self._deleteGroup,[groupIndex],self._insertGroup,[group,groupIndex])
+    return self._insertGroup(group,groupIndex)
+
+def newGroup(self,groupIndex = None):
+    ngroup = EPVGroup(self)
+    return self.insertGroup(ngroup,groupIndex)
+    
+def newRecord(self,recordIndex):
+    if not recordIndex.isValid():
+        return False
+    if type(self.access(recordIndex)) is EPVRecord:
+        recordIndex = recordIndex.parent()
+    group = self.access(recordIndex)
+    self.insertRecord(self,group,EPVRecord(group))
+    
 def _deleteRecord(self,group,position):
-    index = self.index(group.row(),0,group.parent())
-    self.beginRemoveRows.emit(index,position,position)
-    
-    group[position:position+1] = []
-    
-    self.endRemoveRows.emit(index,position,position)
+    index = self.createIndex(group.row(),0,group.parent())
+    self.beginRemoveRows(index,position,position)    
+    group[position:position+1] = []    
+    self.endRemoveRows()
+    return True
+
+def deleteRecord(self,group,position):
+    self.recordState(self._insertRecord,[group,group[position],position],self._deleteRecord,[group,position])
+    return self._deleteRecord(group,position)
 
 def _insertRecord(self,group,record,position):
-    index = self.index(group.row(),0,group.parent())
+    index = self.createIndex(group.row(),0,group.parent())
     self.beginInsertRows(index,position,position)
-    print(len(group))
+    record.__parent__  = group
     group[position:position] = [record]
-    print(len(group))
-    self.endInsertRow(index,position,position)
+    self.endInsertRows()
     return True
 
 def insertRecord(self,group,record,position=None):
     if position is None:
         position = len(group)
     self.recordState(self._deleteRecord,[group,position],self._insertRecord,[group,record,position])
-    self._insertRecord(group,record,position)
-    pass
-
-def replaceRecord(self,parent,record):
-    pass
+    return self._insertRecord(group,record,position)
+    
+def _replaceRecord(self,index,record):
+    self.deleteRecord(index.internalPointer(),index.row())
+    self.insertRecord(index.internalPointer(),record,index.row())
+    
+def replaceRecord(self,index,record):
+    self.startRecording()
+    self.deleteRecord(index.internalPointer(),index.row())
+    self.insertRecord(index.internalPointer(),record,index.row())
+    self.stopRecording()
 
 def moveinto(self,index,data):
-    if data is EPVGroup:
+    if type(data) is EPVGroup:
         for children in data:
-            self.insertRecord(index.internalPointer()[index.row()],children)#TODO - Think fully on how this works
-    elif data is EPVRecord:
-        self.replaceRecord(index,data)
+            self.insertRecord(index.internalPointer()[index.row()],children)
+    elif type(data) is EPVRecord:
+        self._replaceRecord(index,data)
+        
+    
+# x  0 || -1:-1 None -> Moving before group x
+# x  0 || y:0 epv -> Moving before record y on group x
+#-1 -1 || x:0 epv -> Moving ontop of group x
+#-1 -1 || x:0 epvgroup y -> Moving ontop of record x on epvgroup y
 
-def _internalMoveTo(self,target,data):
+    
+def _dropData(self,target,data):
     row, col, parent = target
     typing = type(data)
+    #print("%d %d || %d %d %s"%(row,col,parent.row(),parent.column(),parent.internalPointer()))
     if (row,col) == (-1,-1):
         if typing is EPVRecord and type(self.access(parent)) is EPVGroup:
             self.insertRecord(self.access(parent),data)
@@ -146,7 +202,14 @@ def _internalMoveTo(self,target,data):
         elif result == QMessageBox.Yes:
             self.moveinto(parent,data)
             return True
-    #TODO - Handle other cases
+    elif not parent.isValid():
+        self.insertGroup(data,row)
+        return True
+    else:
+        parent = self.access(parent)
+        if type(parent) is EPVGroup:
+            self.insertRecord(parent,data,row)
+            return True
     return False
 
 def dropMimeData(self, mimeData, dropAction, row, col, parent):
@@ -157,12 +220,27 @@ def dropMimeData(self, mimeData, dropAction, row, col, parent):
             if mimeData.source == self:
                 self.movePending = True
                 self.startRecording()
-                result = self._internalMoveTo((row, col, parent),mimeData.internalPointer)
+                result = self._dropData((row, col, parent),mimeData.internalPointer)
                 if not result: 
                     self.discardRecording()
                     self.movePending = False
                 return result
-            
+    if dropAction == Qt.CopyAction:
+        if EPVMETADATA  in mimeData.formats():
+            if EPVGROUP in mimeData.formats():
+                data = EPVGroup.fromExtendedBinary(mimeData.data(EPVGROUP))
+                if parent.isValid():
+                    row = parent.row()
+                    parent = QModelIndex()
+            elif EPVRECORD in mimeData.formats():
+                data = EPVRecord.fromExtendedBinary(mimeData.data(EPVRECORD))
+            self.startRecording()
+            result = self._dropData((row, col, parent),data)
+            if not result: 
+                self.discardRecording()
+            self.endRecording()
+                
+    #TODO implement CopyAction Qt.CopyAction (it's the same you just deserialize the data instead of using a direct reference)
     #If row and col -1 ask user if they want to replace the data there or just throw it above or below
     return False 
 #bool QAbstractItemModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent)

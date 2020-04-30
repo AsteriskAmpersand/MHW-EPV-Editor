@@ -5,9 +5,10 @@ Created on Wed Apr 29 02:51:53 2020
 @author: AsteriskAmpersand
 """
 
+from copy import deepcopy
 from PyQt5.QtCore import Qt
-from structs.epv import EPVExtraneousProperties
 from model.EPVElements import (EPVC, objectType)
+from structs.epv import EPVExtraneousProperties
 from structs.epv import record as binaryRecord
 from structs.epv import extendedRecord as binaryExtendedRecord
 
@@ -46,6 +47,22 @@ class EPVRecord():
     def EPVSerialize(self,struct):return struct.build(self.serialize())
     def binarySerialize(self):return self.EPVSerialize(binaryRecord)
     def binaryExtendedSerialize(self):return self.EPVSerialize(binaryExtendedRecord)
+    @staticmethod
+    def fromBinary(binaryData,struct=binaryRecord):
+        ngroup = struct.parse(binaryData)
+        if struct is binaryExtendedRecord:
+            trail = ngroup.trailID
+        else:
+            trail = 0
+        return EPVRecord(None,ngroup,trail)
+    @staticmethod
+    def fromExtendedBinary(binaryData):return EPVRecord.fromBinary(binaryData,binaryExtendedRecord)
+    def duplicate(self):self.__parent__.insertRecord(deepcopy(self),self.row()+1)
+    def pasteProperties(self,clipboardObject):
+        if type(clipboardObject) != type(self):
+            return
+        else:            
+            self.__parent__.replaceRecord(self.row(),deepcopy(clipboardObject))
     def getRole(self,role):
         if role == Qt.DisplayRole:
             Display = "Record ID: %s - %s"%(self.recordID,self.path0)
@@ -56,3 +73,9 @@ class EPVRecord():
     def setRole(self,value,role):
         if role == Qt.EditRole:
             self.recordID = value
+            
+    def row(self):
+        return self.__parent__.find(self)
+    
+    def __deepcopy__(self,memo = None):
+        return self.fromExtendedBinary(self.binaryExtendedSerialize())

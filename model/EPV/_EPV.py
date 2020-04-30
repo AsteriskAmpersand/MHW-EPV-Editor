@@ -8,8 +8,11 @@ Created on Sun Apr 19 21:54:37 2020
 
 from structs.epv import EPVFile
 from model.Queue import Queue, Stack
-from model.EPV._EPVGroup import EPVGroup
-from model.EPV._EPVRecord import EPVRecord
+
+from ._EPVGroup import EPVGroup
+from ._EPVRecord import EPVRecord
+from . import _EPVEditOperations as EPVE
+from . import _EPVUndo as EPVU
 
 from PyQt5.QtCore import Qt
 from PyQt5 import QtCore,QtWidgets
@@ -28,13 +31,10 @@ class EPV(QtCore.QAbstractItemModel):
     idEdited = QtCore.pyqtSignal(object)
     undoableAction = QtCore.pyqtSignal(object)
     
-    from ._EPVEditOperations import (flags,supportedDropActions,mimeTypes,mimeData,
-                                     canDropMimeData,dropIntoQuery,removeRows,_deleteRecord,
-                                     _insertRecord,insertRecord,replaceRecord,moveinto,
-                                     _internalMoveTo,dropMimeData)
+    from ._EPVUndo import (clearRedoQueue,discardRecording,endRecording,recordState,redo,startRecording,undo)
+    from ._EPVEditOperations import (_deleteGroup,_deleteRecord,_dropData,_insertGroup,_insertRecord,_replaceRecord,canDropMimeData,deleteGroup,deleteRecord,dropIntoQuery,dropMimeData,flags,hexRepresent,insertGroup,insertRecord,mimeData,mimeTypes,moveinto,newGroup,newRecord,removeRows,replaceRecord,supportedDropActions)
+    from ._EPVCopyStack import (deepcopy,mixedStackQuery,pastePureStack,pasteStack)
     
-    from ._EPVUndo import (startRecording,addEvent,endRecording,discardRecording,
-                           recordState,undo,redo,)
     
     def __init__(self, parent = None, filepath = None):
         super().__init__(parent)
@@ -73,12 +73,12 @@ class EPV(QtCore.QAbstractItemModel):
     
     def serialize(self):
         header = {"signature":self.signature}
-        blocks = {"count":len(self.blocks),"blocks":sum(map(lambda x: x.blockSerialize(),self.blocks),[])}
+        blocks = {"count":len(self.children),"blocks":sum(map(lambda x: x.blockSerialize(),self.children),[])}
         trails = []
         for gix,group in enumerate(self.blocks):
             for rix,record in enumerate(group):
                 trails.append({"blockID":gix,"recordID":rix,"trailID":record.trailID})
-        trail = {"padding":0,"trailCount":self.blocks.recordCount(),
+        trail = {"padding":0,"trailCount":sum((len(c) for c in self.children)),
                  "trails":trails,"epvPath":self.epvPath,"ONE":1,"NULL":0}
         return EPVFile.file_serialize(header,blocks,trail)
                
@@ -166,7 +166,12 @@ class EPV(QtCore.QAbstractItemModel):
         if not parent.isValid():
             parentItem = self
         else:
-            parentItem = parent.internalPointer()[parent.row()]
+            parentObject = parent.internalPointer()
+            if len(parentObject)<=parent.row():
+                print("Index invalidated at some point")
+                return 0
+            #This case should never happen but QT sometiems hickups on invalid indexes
+            parentItem = parentObject[parent.row()]
         if not hasattr(parentItem,"__len__"):
             return 0
         return len(parentItem)
