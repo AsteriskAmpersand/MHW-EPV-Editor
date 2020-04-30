@@ -65,6 +65,8 @@ record = Struct(
     "paramV" / int32[4] *"int[4]",#[0, 0, 0, 0] normally
 )
 
+extendedRecord = record + Struct("trailID" / int32,)
+
 EPVExtraneousProperties = OrderedDict([(i.name,i.docs) for i in record.subcons if i.name not in ["packed_path","recordID","epvColor","boneID"]])
 
 defaultRecord = {}
@@ -73,6 +75,12 @@ group = Struct(
     "recordCount" / uint32,
     "groupID" / ushort,
     "records" / record[this.recordCount],
+)
+
+extendedGroup = Struct(
+    "recordCount" / uint32,
+    "groupID" / ushort,
+    "records" / extendedRecord[this.recordCount],     
 )
 
 trailRecord = Struct(

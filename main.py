@@ -83,7 +83,7 @@ class MainWindow(QtWidgets.QMainWindow):
         tab = self.ui.fileTabs.widget(ix)
         tab.SaveAs()
     def saveAll(self):
-        for tab in [self.ui.fileTabs.widget(i) for i in range(self.ui.fileTabs.count)]:
+        for tab in [self.ui.fileTabs.widget(i) for i in range(self.ui.fileTabs.count())]:
             tab.Save()
     def undo(self):
         widget = self.ui.fileTabs.currentWidget()
@@ -100,7 +100,7 @@ class MainWindow(QtWidgets.QMainWindow):
         ix = self.ui.fileTabs.indexOf(tab)
         self.ui.fileTabs.setTabText(ix,name)
     def closeEvent(self, event):
-        for ix in range(self.ui.fileTabs.count):
+        for ix in range(self.ui.fileTabs.count()):
             tab = self.ui.fileTabs.widget(ix) 
             if not tab.RequestSave():
                 event.ignore()

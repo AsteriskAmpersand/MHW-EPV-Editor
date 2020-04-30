@@ -50,6 +50,8 @@ class ParameterBlock():
         else:
             for prop in self.struct.subcons:
                 self.__setattr__(prop.name,getattr(record,prop.name))
+    def serialize(self):
+        return {prop.name:getattr(self,prop.name) for prop in self.struct.subcons}
             
 class ParameterBlock1(ParameterBlock):
     struct = parameterBlock1

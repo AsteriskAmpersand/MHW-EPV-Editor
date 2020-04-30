@@ -6,12 +6,12 @@ Created on Sun Apr 19 21:54:37 2020
 """
 
 
-from structs.epv import EPVFile, EPVExtraneousProperties
+from structs.epv import EPVFile
 from model.Queue import Queue, Stack
-from model.EPVElements import (EPVC, objectType)
-from model.QList import QList
+from model.EPV._EPVGroup import EPVGroup
+from model.EPV._EPVRecord import EPVRecord
+
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QItemDelegate, QSpinBox
 from PyQt5 import QtCore,QtWidgets
 import sys
 
@@ -23,105 +23,24 @@ def catch_exceptions(t, val, tb):
 
 old_hook = sys.excepthook
 sys.excepthook = catch_exceptions
-
-class EPVRecord():
-    def __init__(self,parent=None,record = None,trailID = 0):
-        if record is None:
-            self.recordID = 0
-            self.path0,self.path1,self.path2,self.path3 = "","","",""
-            self.boneID = 255
-            self.epvc = [EPVC() for i in range(8)]
-            self.trailID = trailID
-            for prop in EPVExtraneousProperties:
-                setattr(self,prop,objectType(EPVExtraneousProperties[prop])(None))
-        else:
-            self.recordID = record.recordID
-            self.path0,self.path1,self.path2,self.path3 = record.packed_path
-            self.boneID = record.boneID
-            self.epvc = [EPVC(record.epvColor[i]) for i in range(8)]
-            self.trailID = trailID
-            for prop in EPVExtraneousProperties:
-                setattr(self,prop,objectType(EPVExtraneousProperties[prop])(getattr(record,prop)))
-        self.__parent__ = parent
-        
-    def serialize(self):
-        export = {}
-        export["packed_path"] = [str(self.path0).replace("\x00"),str(self.path1).replace("\x00"),
-                                 str(self.path2).replace("\x00"),str(self.path3).replace("\x00")]
-        export["recordID"] = self.recordID
-        export["boneID"] = self.boneID
-        export["epvColor"] = [epvc.serialize() for epvc in self.epvc]
-        for prop in EPVExtraneousProperties:
-            sprop = getattr(self,prop)
-            export[prop] = sprop.serialize() if hasattr(sprop,"serialize") else sprop
-    def getRole(self,role):
-        if role == Qt.DisplayRole:
-            Display = "Record ID: %s - %s"%(self.recordID,self.path0)
-            return Display
-        if role == Qt.EditRole:
-            return self.recordID
-        
-    def setRole(self,value,role):
-        if role == Qt.EditRole:
-            self.recordID = value
-
-class GroupRecordDelegate(QItemDelegate):
-    def createEditor(self, parent, option, index):
-        box = QSpinBox(parent)
-        box.setMaximum(2**16-1)        
-        return box
-
-    def setEditorData(self, editor, index):
-        value = index.model().data(index, Qt.EditRole)
-        editor.setValue(value)
-
-    def setModelData(self, editor, model, index):
-        QtWidgets.QMessageBox.critical(None,
-                               "No Error","No Error")
-        value = editor.value()
-        QtWidgets.QMessageBox.critical(None,
-                               "No Error 2","No Error 2")
-        model.setData(index, value, Qt.EditRole)
-
-class EPVGroup(QList):
-    def __init__(self,parent = None, group = None,trails = None):
-        self.groupID = 0
-        #self.records = QList()
-        super().__init__(parent,[])
-        if group is not None and trails is not None:
-            self.fromBlock(group, trails)
-
-    def fromBlock(self,group,trails):
-        self.groupID = group.groupID
-        for record,trail in zip(group.records,trails):
-            self.append(EPVRecord(self,record,trail.trailID))
-            
-    def blockSerialize(self):
-        return {"count":len(self),
-                "records":[record.serialize() for record in self]}        
-        
-    def getRole(self,role):
-        if role == Qt.DisplayRole:
-            Display = "Group ID: %s - %s Record%s"%(self.groupID,len(self),"s" if len(self)>1 else "")
-            return Display
-        if role == Qt.EditRole:
-            return self.groupID
-    
-    def setRole(self,value,role):
-        if role == Qt.EditRole:
-            self.groupID = value
-        
-    def row(self):
-        if self.__parent__:
-            return self.__parent__.find(self)
     
 class EPV(QtCore.QAbstractItemModel):
     idEdited = QtCore.pyqtSignal(object)
     undoableAction = QtCore.pyqtSignal(object)
+    
+    from ._EPVEditOperations import (flags,supportedDropActions,mimeTypes,mimeData,
+                                     canDropMimeData,dropIntoQuery,removeRows,_deleteRecord,
+                                     _insertRecord,insertRecord,replaceRecord,moveinto,
+                                     _internalMoveTo,dropMimeData)
+    
+    from ._EPVUndo import (startRecording,addEvent,endRecording,discardRecording,
+                           recordState,undo,redo,)
+    
     def __init__(self, parent = None, filepath = None):
         super().__init__(parent)
         self.undoStack = Stack()
         self.redoQueue = Queue()
+        self.movePending = False
         self.__parent__ = parent
         self.children = []
         if filepath is None:
@@ -184,29 +103,36 @@ class EPV(QtCore.QAbstractItemModel):
 #        print(len(item))
         return item[index.row()].getRole(role)
     
-    def setData(self,index,value,role,supress=False):
+    def _setData(self,index,value,role):
+        item = index.internalPointer()
+        item[index.row()].setRole(value,role)
+    
+    def setData(self,index,value,role):
         if not index.isValid():
             return False
         item = index.internalPointer()
         prev = item[index.row()].getRole(role)
-        self.recordState(self.setData,[index,prev,role,True])
-        item[index.row()].setRole(value,role)
+        
+        def doSet(v):
+            self._setData(index,v,role)
+            self.idEdited.emit(index)            
+            self.dataChanged.emit(index,index,[role])
+            
+        self.recordState(doSet,[prev],
+                         doSet,[value])
+        
+        self._setData(index,value,role)
+        
         self.idEdited.emit(index)            
         self.dataChanged.emit(index,index,[role])
-        if not supress:
-            self.undoableAction.emit(self)
+        self.undoableAction.emit(self)
         return True
     
     def access(self,index):
         if not index.isValid():
-            return None
+            return self
         else:
             return index.internalPointer()[index.row()]
-    
-    def flags(self, index):
-        if not index.isValid():
-            return Qt.NoItemFlags
-        return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable
     
     def index(self, row, column, parent=QtCore.QModelIndex):
         if not self.hasIndex(row, column, parent):
@@ -250,6 +176,7 @@ class EPV(QtCore.QAbstractItemModel):
             return 0
         return 1
     
+    """
     def recordState(self,undoerFunction,undoerParameters):
         self.undoStack.put((undoerFunction,undoerParameters))
     def undo(self):
@@ -259,3 +186,4 @@ class EPV(QtCore.QAbstractItemModel):
     def redo(self):
         func,param = self.redoQueue.pop()
         func(*param)
+    """

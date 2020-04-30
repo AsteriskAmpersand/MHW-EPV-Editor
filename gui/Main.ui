@@ -52,6 +52,7 @@
     </property>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
+    <addaction name="actionDelete"/>
     <addaction name="separator"/>
     <addaction name="actionDuplicate"/>
     <addaction name="actionCopy_Entry"/>
@@ -59,10 +60,11 @@
     <addaction name="actionCopy_Properties"/>
     <addaction name="actionPaste_Properties"/>
     <addaction name="separator"/>
-    <addaction name="actionFind"/>
-    <addaction name="actionFind_Next"/>
-    <addaction name="actionReplace"/>
-    <addaction name="actionBatch_Replace"/>
+    <addaction name="actionPush_To_Copy_Stack"/>
+    <addaction name="actionPop_Copy_Stack"/>
+    <addaction name="actionPaste_Copy_Stack"/>
+    <addaction name="actionClear_Copy_Stack"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuScripting">
     <property name="title">
@@ -77,8 +79,18 @@
     <addaction name="actionAbout"/>
     <addaction name="actionScripting"/>
    </widget>
+   <widget class="QMenu" name="menuSearch">
+    <property name="title">
+     <string>Search</string>
+    </property>
+    <addaction name="actionFind"/>
+    <addaction name="actionFind_Next"/>
+    <addaction name="actionReplace"/>
+    <addaction name="actionBatch_Replace"/>
+   </widget>
    <addaction name="menuOpen"/>
    <addaction name="menuEdit"/>
+   <addaction name="menuSearch"/>
    <addaction name="menuScripting"/>
    <addaction name="menuHelp"/>
   </widget>
@@ -244,6 +256,31 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="actionPush_To_Copy_Stack">
+   <property name="text">
+    <string>Push To Copy Stack</string>
+   </property>
+  </action>
+  <action name="actionPop_Copy_Stack">
+   <property name="text">
+    <string>Pop Copy Stack</string>
+   </property>
+  </action>
+  <action name="actionPaste_Copy_Stack">
+   <property name="text">
+    <string>Paste Copy Stack</string>
+   </property>
+  </action>
+  <action name="actionClear_Copy_Stack">
+   <property name="text">
+    <string>Clear Copy Stack</string>
+   </property>
+  </action>
+  <action name="actionDelete">
+   <property name="text">
+    <string>Delete</string>
    </property>
   </action>
  </widget>
