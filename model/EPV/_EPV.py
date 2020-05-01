@@ -41,6 +41,7 @@ class EPV(QtCore.QAbstractItemModel):
         self.undoStack = Stack()
         self.redoQueue = Queue()
         self.movePending = False
+        self.complexUndo = False
         self.__parent__ = parent
         self.children = []
         if filepath is None:
@@ -84,10 +85,6 @@ class EPV(QtCore.QAbstractItemModel):
                
     def addGroup(self, group):
         self.append(group)
-    
-    def newGroup(self):
-        ngroup = EPVGroup()
-        self.addGroup(ngroup)
     
     def toBlocks(self,body,trails):
         recordTrails = iter(trails)
@@ -167,9 +164,9 @@ class EPV(QtCore.QAbstractItemModel):
             parentItem = self
         else:
             parentObject = parent.internalPointer()
-            if len(parentObject)<=parent.row():
-                print("Index invalidated at some point")
-                return 0
+            #if len(parentObject)<=parent.row():
+            #    print("Index invalidated at some point")
+            #    return 0
             #This case should never happen but QT sometiems hickups on invalid indexes
             parentItem = parentObject[parent.row()]
         if not hasattr(parentItem,"__len__"):

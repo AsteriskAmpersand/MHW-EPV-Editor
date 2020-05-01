@@ -10,6 +10,7 @@ from model.RecordProperties import RecordProperties
 #from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtWidgets import QWidget, QColorDialog
 from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtGui import QColor
 
 class colorMediator(QWidget):
     valueChanged = pyqtSignal(object)    
@@ -50,7 +51,7 @@ class EPVCEntry(RecordProperties):
     properties = ["efxslot","color","alpha","saturation","frequency","size"]
     
     def paletteChange(self):
-        color = QColorDialog.getColor()
+        color = QColorDialog.getColor(QColor("#%X%X%X"%self.color))
         if color.isValid():
             self.color = color.red(),color.green(),color.blue()
             self.ui.color.valueChanged.emit("color")

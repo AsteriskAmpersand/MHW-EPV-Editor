@@ -68,6 +68,17 @@ record = Struct(
 extendedRecord = record + Struct("trailID" / int32,)
 
 EPVExtraneousProperties = OrderedDict([(i.name,i.docs) for i in record.subcons if i.name not in ["packed_path","recordID","epvColor","boneID"]])
+class parameterBlockDefault():
+    def __init__(self):
+        for prop in self.struct.subcons:
+            setattr(self,prop.name,0)
+class parameterBlock1Default(parameterBlockDefault):
+    struct = parameterBlock1
+class parameterBlock2Default(parameterBlockDefault):
+    struct = parameterBlock2   
+EPVExtraneousDefaults = OrderedDict([(prop,0) for prop in EPVExtraneousProperties if "parameterBlock" not in prop] + 
+                                    [("parameterBlock1",parameterBlock1Default()),
+                                     ("parameterBlock2",parameterBlock2Default())])
 
 defaultRecord = {}
     

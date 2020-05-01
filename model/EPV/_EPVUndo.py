@@ -8,7 +8,8 @@ from ._ComplexUndo import CompositeUndo
 from model.Queue import Queue
 
 def startRecording(self):
-    self.complexUndo = CompositeUndo(self)
+    if not self.complexUndo:
+        self.complexUndo = CompositeUndo(self)
         
 def endRecording(self):
     self.undoStack.put((self.complexUndo.undo,(),self.complexUndo.redo,()))

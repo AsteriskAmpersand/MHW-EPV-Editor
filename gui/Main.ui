@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1048</width>
+    <width>1030</width>
     <height>836</height>
    </rect>
   </property>
@@ -32,7 +32,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1048</width>
+     <width>1030</width>
      <height>21</height>
     </rect>
    </property>
@@ -64,6 +64,8 @@
     <addaction name="actionPaste_Copy_Stack"/>
     <addaction name="actionClear_Copy_Stack"/>
     <addaction name="separator"/>
+    <addaction name="actionNew_Group"/>
+    <addaction name="actionNew_Record"/>
    </widget>
    <widget class="QMenu" name="menuScripting">
     <property name="title">
@@ -248,6 +250,9 @@
    <property name="text">
     <string>Batch Replace</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+R</string>
+   </property>
   </action>
   <action name="actionDuplicate">
    <property name="text">
@@ -289,6 +294,35 @@
   <action name="actionDelete">
    <property name="text">
     <string>Delete</string>
+   </property>
+   <property name="shortcut">
+    <string>Del</string>
+   </property>
+  </action>
+  <action name="actionCopy_Stack">
+   <property name="text">
+    <string>Copy Stack</string>
+   </property>
+  </action>
+  <action name="actionNew_2">
+   <property name="text">
+    <string>New Entry</string>
+   </property>
+  </action>
+  <action name="actionNew_Group">
+   <property name="text">
+    <string>New Group</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+N</string>
+   </property>
+  </action>
+  <action name="actionNew_Record">
+   <property name="text">
+    <string>New Record</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+N</string>
    </property>
   </action>
  </widget>

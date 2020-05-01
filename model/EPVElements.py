@@ -44,7 +44,7 @@ def emptyProp(propertyType):
     
 class ParameterBlock():
     def __init__(self,record=None):
-        if record is not None:
+        if record is None:
             for prop in self.struct.subcons:
                 self.__setattr__(prop.name,emptyProp(prop.docs))
         else:

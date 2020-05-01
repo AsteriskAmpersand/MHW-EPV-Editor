@@ -63,4 +63,4 @@ class CopyStack(Stack):
         types = {t:CopyStack() for t in self.__types__}
         for entry in self.consume():
             types[type(entry)].put(entry)
-        return types.values()
+        return types

@@ -23,6 +23,10 @@ class QList (QtCore.QAbstractListModel):
         self.pendingRemoveRowsAfterDrop = False
         self.__parent__ = parent
         super().__init__(self.__parent__)
+    
+    def setParent(self,newParent):
+        self.__parent__ = newParent
+        super().setParent(newParent)
         
     def rowCount(self, index = QtCore.QModelIndex()):
         return(len(self))

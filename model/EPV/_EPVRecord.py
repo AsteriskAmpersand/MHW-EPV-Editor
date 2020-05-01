@@ -8,7 +8,7 @@ Created on Wed Apr 29 02:51:53 2020
 from copy import deepcopy
 from PyQt5.QtCore import Qt
 from model.EPVElements import (EPVC, objectType)
-from structs.epv import EPVExtraneousProperties
+from structs.epv import EPVExtraneousProperties, EPVExtraneousDefaults
 from structs.epv import record as binaryRecord
 from structs.epv import extendedRecord as binaryExtendedRecord
 
@@ -21,7 +21,7 @@ class EPVRecord():
             self.epvc = [EPVC() for i in range(8)]
             self.trailID = trailID
             for prop in EPVExtraneousProperties:
-                setattr(self,prop,objectType(EPVExtraneousProperties[prop])(None))
+                setattr(self,prop,objectType(EPVExtraneousProperties[prop])(EPVExtraneousDefaults[prop]))
         else:
             self.recordID = record.recordID
             self.path0,self.path1,self.path2,self.path3 = record.packed_path
@@ -31,7 +31,9 @@ class EPVRecord():
             for prop in EPVExtraneousProperties:
                 setattr(self,prop,objectType(EPVExtraneousProperties[prop])(getattr(record,prop)))
         self.__parent__ = parent
-        
+    
+    def setParent(self,newParent):
+        self.__parent__=newParent
     def serialize(self):
         export = {}
         export["packed_path"] = [str(self.path0).replace("\x00",""),str(self.path1).replace("\x00",""),

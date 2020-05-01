@@ -202,7 +202,15 @@ class EPVTab(QtWidgets.QWidget):
     def pasteProperties(self,clipboard):self.currentEntry().pasteProperties(clipboard)
     def pushStack(self,mainCopyStack):mainCopyStack.put(self.currentEntry())
     def pasteStack(self,mainCopyStack):self.EPVModel.pasteStack(self.currentIndex(),mainCopyStack)
-            
+    def newGroup(self):
+        index = self.currentIndex()
+        if index.isValid():
+            self.EPVModel.newGroup(index.row()+1)
+            self.selectNextGroup()
+        else:
+            self.EPVModel.newGroup()            
+        
+    def newRecord(self):self.EPVModel.newRecord(self.currentIndex())
 # =============================================================================
 # Main - File Functionality
 # =============================================================================
@@ -212,6 +220,18 @@ class EPVTab(QtWidgets.QWidget):
         selection = self.ui.recordBrowser.selectedIndexes()
         if len(selection)==1:
             return selection[0]
+        else:
+            return QtCore.QModelIndex()
+    def selectNextGroup(self):
+        current = self.currentIndex()
+        if not current.isValid():
+            return
+        if current.internalPointer() is EPVGroup:
+            current = current.parent()
+        if current.row()+1 >= len(self.EPVModel):
+            return
+        self.ui.recordBrowser.setCurrentIndex(self.EPVModel.index(current.row()+1,current.column(),current.parent()))
+        
     def SaveToFile(self,path):
         with open(path,"wb") as outf:
             outf.write(self.EPVModel.serialize())

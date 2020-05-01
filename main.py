@@ -12,8 +12,10 @@ from pathlib import Path
 from gui.Main import Ui_MainWindow
 from model.EPVTab import EPVTab
 from model.Queue import CopyStack
+from splash.Splash import SplashScreen
 
 from PyQt5 import uic, QtWidgets, QtGui, QtCore
+from PyQt5.QtGui import QPalette, QColor
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtCore import QFile, QTextStream
 _translate = QtCore.QCoreApplication.translate
@@ -38,7 +40,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
         self.ui.fileTabs.setTabsClosable(True)
         
-        self.setWindowTitle("Asterisk EPV Editor")
+        self.setWindowTitle("Asterisk's Nebula Asterism")
         self.connectMenus()
         self.connectSignals()
         self.show()
@@ -64,6 +66,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.actionPush_To_Copy_Stack.triggered.connect(self.pushStack)
         self.ui.actionPaste_Copy_Stack.triggered.connect(self.pasteStack)
         self.ui.actionClear_Copy_Stack.triggered.connect(self.clearStack)
+        
+        self.ui.actionNew_Group.triggered.connect(self.newGroup)
+        self.ui.actionNew_Record.triggered.connect(self.newRecord)
     
     def connectSignals(self):
         self.ui.fileTabs.tabCloseRequested.connect(self.closeTab)
@@ -126,6 +131,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def pasteStack(self):self.currentWidget().pasteStack(self.copyStack)
     def clearStack(self):
         self.copyStack.clear()
+    def newGroup(self):self.currentWidget().newGroup()
+    def newRecord(self):self.currentWidget().newRecord()
         
 # =============================================================================
 # Housekeeping Blcok
@@ -145,6 +152,8 @@ class MainWindow(QtWidgets.QMainWindow):
             if not tab.RequestSave():
                 event.ignore()
                 return
+        for ix in range(self.ui.fileTabs.count()-1,-1,-1):
+            tab = self.ui.fileTabs.widget(ix) 
             tab.tabNameChanged.disconnect(self.renameTab)
             self.ui.fileTabs.removeTab(ix)
         event.accept()
@@ -153,8 +162,32 @@ if __name__ == '__main__':
     #from pathlib import Path
     app = QtWidgets.QApplication(sys.argv)
     args = app.arguments()[1:]
+    splash = SplashScreen()
+    response = splash.exec()
+    if not response:
+        sys.exit(app.exec_())
+        
+    app.setStyle("Fusion")
+    
+    # Now use a palette to switch to dark colors:
+    palette = QPalette()
+    palette.setColor(QPalette.Window, QColor(53, 53, 53))
+    palette.setColor(QPalette.WindowText, QtCore.Qt.white)
+    palette.setColor(QPalette.Base, QColor(25, 25, 25))
+    palette.setColor(QPalette.AlternateBase, QColor(53, 53, 53))
+    palette.setColor(QPalette.ToolTipBase, QtCore.Qt.white)
+    palette.setColor(QPalette.ToolTipText, QtCore.Qt.white)
+    palette.setColor(QPalette.Text, QtCore.Qt.white)
+    palette.setColor(QPalette.Button, QColor(53, 53, 53))
+    palette.setColor(QPalette.ButtonText, QtCore.Qt.white)
+    palette.setColor(QPalette.BrightText, QtCore.Qt.red)
+    palette.setColor(QPalette.Link, QColor(42, 130, 218))
+    palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
+    palette.setColor(QPalette.HighlightedText, QtCore.Qt.black)
+    app.setPalette(palette)
+    
     window = MainWindow(args)
     #tab = EPVTab(self,r"E:\MHW\chunkG0\pl\f_equip\pl124_0000\body\epv\f_body124.epv3")
     #self.ui.fileTabs.addTab(tab,"Test") 
-    window.openFile(Path(r"E:\MHW\chunkG0\pl\f_equip\pl124_0000\body\epv\f_body124.epv3"))
+    window.openFile(Path(r"E:\MHW\chunkG0\wp\rod\epv\hm_wp10_01.epv3"))
     sys.exit(app.exec_())

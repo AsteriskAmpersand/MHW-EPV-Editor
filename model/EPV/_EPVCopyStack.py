@@ -10,6 +10,7 @@ from ._EPVGroup import EPVGroup
 from ._EPVRecord import EPVRecord
 
 from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtCore import QModelIndex
 
 def pasteStack(self,index,copyStack):
     if len(copyStack) == 0:
@@ -19,14 +20,18 @@ def pasteStack(self,index,copyStack):
         self.pastePureStack(index,copyStack)
     else:
         decision = self.mixedStackQuery().exec()
-        for typingStack in copyStack.split():
-            typing = next(copyStack.types())
+        stacks = copyStack.split()
+        for typing in [EPVRecord,EPVGroup]:
+            typingStack = stacks[typing]
             if typing is EPVRecord:
-                if decision == QMessageBox.YesRole:
-                    nindex = self.newGroup()
+                if decision == 0:
+                    group = self.newGroup()
+                    nindex = self.index(group.row(),0,QModelIndex())
                     self.pastePureStack(nindex,typingStack)
-                elif decision == QMessageBox.NoRole:
+                elif decision == 1:
                     self.pastePureStack(index,typingStack)
+                else:
+                    continue
             else:
                 self.pastePureStack(index,typingStack)
     self.endRecording()
@@ -35,9 +40,10 @@ def pasteStack(self,index,copyStack):
 def pastePureStack(self,index,copyStack):
     target = self.access(index)
     typing = next(copyStack.types())
-    print(list(copyStack.types()))
-    print(typing)
-    print(typing is EPVGroup)
+    #print(list(copyStack.types()))
+    #print(typing)
+    #print(typing is EPVGroup)
+    #It's failing for groups
     if typing is EPVGroup:
         op = self.insertGroup
         if type(target) is EPVGroup:
@@ -49,7 +55,8 @@ def pastePureStack(self,index,copyStack):
         if type(target) is EPVGroup:
             args = lambda entry: (target,deepcopy(entry))
         elif type(target) is EPVRecord:
-            args = lambda entry: (target.__parent__,deepcopy(entry),target.row()+1)            
+            args = lambda entry: (target.__parent__,deepcopy(entry),target.row()+1)   
+            print(target.__parent__)
     for entry in copyStack.consume():
         op(*args(entry))
         

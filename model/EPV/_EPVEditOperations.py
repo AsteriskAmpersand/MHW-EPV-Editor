@@ -115,7 +115,7 @@ def _deleteGroup(self,groupIndex):
 def _insertGroup(self,group,groupIndex):
     index = QModelIndex()
     self.beginInsertRows(index,groupIndex,groupIndex)  
-    group.__parent__ = self
+    group.setParent(self)
     self[groupIndex:groupIndex] = [group]
     self.endInsertRows()
     return True
@@ -128,7 +128,8 @@ def insertGroup(self,group,groupIndex = None):
 
 def newGroup(self,groupIndex = None):
     ngroup = EPVGroup(self)
-    return self.insertGroup(ngroup,groupIndex)
+    self.insertGroup(ngroup,groupIndex)
+    return ngroup
     
 def newRecord(self,recordIndex):
     if not recordIndex.isValid():
@@ -136,7 +137,7 @@ def newRecord(self,recordIndex):
     if type(self.access(recordIndex)) is EPVRecord:
         recordIndex = recordIndex.parent()
     group = self.access(recordIndex)
-    self.insertRecord(self,group,EPVRecord(group))
+    self.insertRecord(group,EPVRecord(group))
     
 def _deleteRecord(self,group,position):
     index = self.createIndex(group.row(),0,group.parent())
@@ -152,7 +153,7 @@ def deleteRecord(self,group,position):
 def _insertRecord(self,group,record,position):
     index = self.createIndex(group.row(),0,group.parent())
     self.beginInsertRows(index,position,position)
-    record.__parent__  = group
+    record.setParent(group)
     group[position:position] = [record]
     self.endInsertRows()
     return True

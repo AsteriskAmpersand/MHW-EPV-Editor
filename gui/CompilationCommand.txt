@@ -3,3 +3,10 @@
 "D:\Program Files\WinPython-64bit-3.5.3.0Qt5\python-3.5.3.amd64\Scripts\pyuic5.bat" -x RecordIDs.ui -o RecordIDs.py
 "D:\Program Files\WinPython-64bit-3.5.3.0Qt5\python-3.5.3.amd64\Scripts\pyuic5.bat" -x FileTab.ui -o FileTab.py
 "D:\Program Files\WinPython-64bit-3.5.3.0Qt5\python-3.5.3.amd64\Scripts\pyuic5.bat" -x Main.ui -o Main.py
+
+"D:\Program Files\WinPython-64bit-3.5.3.0Qt5\python-3.5.3.amd64\Scripts\pyuic5.bat" -x "E:\MHW-EPV-Editor\resources\SplashScreen.ui" -o ""E:\MHW-EPV-Editor\resources\SplashScreen.py"
+"D:\Program Files\WinPython-64bit-3.5.3.0Qt5\python-3.5.3.amd64\Scripts\pyrcc5" -o "E:\MHW-EPV-Editor\resources\SplashBackground_rc.py" "E:\MHW-EPV-Editor\resources\SplashBackground.qrc"
+
+"D:\Program Files\WinPython-64bit-3.5.3.0Qt5\python-3.5.3.amd64\Scripts\pyuic5.bat" -x EPVReplace.ui -o EPVReplace.py
+"D:\Program Files\WinPython-64bit-3.5.3.0Qt5\python-3.5.3.amd64\Scripts\pyuic5.bat" -x EPVReplaceForm.ui -o EPVReplaceForm.py
+"D:\Program Files\WinPython-64bit-3.5.3.0Qt5\python-3.5.3.amd64\Scripts\pyuic5.bat" -x EPVCustomizeReplacement.ui -o EPVCustomizeReplacement.py
