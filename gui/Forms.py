@@ -7,7 +7,7 @@ Created on Fri Apr 24 05:48:36 2020
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 from model.utils import layout_widgets
-from model.Queue import Queue
+from generic.Queue import Queue
 from model.RecordProperties import RecordProperties
 from structs.epv import parameterBlock1, parameterBlock2
 from collections import OrderedDict

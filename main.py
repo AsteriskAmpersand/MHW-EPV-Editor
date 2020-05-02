@@ -11,7 +11,7 @@ from pathlib import Path
 
 from gui.Main import Ui_MainWindow
 from model.EPVTab import EPVTab
-from model.Queue import CopyStack
+from generic.Queue import CopyStack
 from splash.Splash import SplashScreen
 
 from PyQt5 import uic, QtWidgets, QtGui, QtCore

@@ -7,7 +7,7 @@ Created on Sun Apr 19 21:54:37 2020
 
 
 from structs.epv import EPVFile
-from model.Queue import Queue, Stack
+from generic.Queue import Queue, Stack
 
 from ._EPVGroup import EPVGroup
 from ._EPVRecord import EPVRecord
@@ -31,7 +31,7 @@ class EPV(QtCore.QAbstractItemModel):
     idEdited = QtCore.pyqtSignal(object)
     undoableAction = QtCore.pyqtSignal(object)
     
-    from ._EPVUndo import (clearRedoQueue,discardRecording,endRecording,recordState,redo,startRecording,undo)
+    from ._EPVUndo import (clearRedoStack,discardRecording,endRecording,recordState,redo,startRecording,undo)
     from ._EPVEditOperations import (_deleteGroup,_deleteRecord,_dropData,_insertGroup,_insertRecord,_replaceRecord,canDropMimeData,deleteGroup,deleteRecord,dropIntoQuery,dropMimeData,flags,hexRepresent,insertGroup,insertRecord,mimeData,mimeTypes,moveinto,newGroup,newRecord,removeRows,replaceRecord,supportedDropActions)
     from ._EPVCopyStack import (deepcopy,mixedStackQuery,pastePureStack,pasteStack)
     

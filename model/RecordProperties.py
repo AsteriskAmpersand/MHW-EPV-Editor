@@ -6,7 +6,7 @@ Created on Sun Apr 26 23:55:32 2020
 """
 from PyQt5.QtWidgets import QWidget
 from PyQt5 import QtCore
-from model.Queue import Queue
+from generic.Queue import Queue
 
 
 
@@ -15,7 +15,7 @@ class RecordProperties(QWidget):
     def __init__(self,parent=None):
         super().__init__(parent)
         self.undoStack = []
-        self.redoQueue = Queue()
+        self.redoStack = Stack()
         self.setupUI()
         self.functors = []
     def setupUI(self):
@@ -77,8 +77,8 @@ class RecordProperties(QWidget):
         model,val,name = peek
         self.recordState(name,inverse,model)
         self.consumeAction(source)        
-    def undo(self):self.do(self.undoStack[-1],self.redoQueue.put,self.undoStack.pop)
-    def redo(self):self.do(self.redoQueue.peek(),self.undoStack.append,self.redoQueue.get)  
-    def clearRedoQueue(self):
-        if not self.redoQueue.empty():
-            self.redoQueue = Queue()
+    def undo(self):self.do(self.undoStack[-1],self.redoStack.put,self.undoStack.pop)
+    def redo(self):self.do(self.redoStack.peek(),self.undoStack.append,self.redoStack.get)  
+    def clearRedoStack(self):
+        if not self.redoStack.empty():
+            self.redoStack.clear()

@@ -9,7 +9,7 @@ import sys
 import os
 
 from gui.EPVReplace import Ui_Dialog
-
+from model.CustomizeReplacement import CustomizeReplacement
 #from PyQt5 import uic, QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QDialog, QApplication
 from PyQt5.QtGui import QDesktopServices
@@ -47,11 +47,11 @@ class ReplaceDialog(QDialog):
     
     def customize(self):
         results = self._replace()
-        #customize = CustomizeReplacement ()
-        #result = customize.exec()
-        #if result == QDialog.Accepted():
-        #   self.results = customize.results
-        #   self.accept()
+        customize = CustomizeReplacement (results)
+        result = customize.exec()
+        if result == QDialog.Accepted():
+           self.results = customize.results
+           self.accept()
         
     
 if __name__ == '__main__':

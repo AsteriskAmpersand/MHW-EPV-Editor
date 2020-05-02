@@ -4,7 +4,7 @@ Created on Wed Apr 29 19:29:49 2020
 
 @author: AsteriskAmpersand
 """
-from model.Queue import Queue,Stack
+from generic.Queue import Queue,Stack
 class CompositeUndo():
     def __init__(self,model):
         self.model = model

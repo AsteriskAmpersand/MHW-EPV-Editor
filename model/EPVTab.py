@@ -8,7 +8,7 @@ Created on Wed Apr 22 16:45:22 2020
 import sys
 from itertools import chain
 from pathlib import Path
-from model.Queue import Queue,Stack
+from generic.Queue import Queue,Stack
 from model.EPV import EPV,EPVGroup,EPVRecord
 from model.EPVCSlots import EPVCEntry
 from model.utils import layout_widgets, qlistiter
@@ -39,7 +39,7 @@ class EPVTab(QtWidgets.QWidget):
     def __init__(self, parent = None, epvpath = None):
         super().__init__(parent)
         self.undoStack = Stack()
-        self.redoQueue = Queue()
+        self.redoStack = Stack()
         self.__changed__ = False
         self.path = epvpath
         self.changed = epvpath is None
@@ -171,23 +171,23 @@ class EPVTab(QtWidgets.QWidget):
     def actionPushed(self,responsible):
         self.changed = True
         self.undoStack.append(responsible)
-        self.clearRedoQueue()
+        self.clearredoStack()
     def undo(self):
         if self.undoStack.empty():
             return
         responsible = self.undoStack.pop()
         responsible.undo()
-        self.redoQueue.put(responsible)
+        self.redoStack.put(responsible)
     def redo(self):
-        if self.redoQueue.empty():
+        if self.redoStack.empty():
             return
-        responsible = self.redoQueue.get()
+        responsible = self.redoStack.get()
         responsible.redo()
         self.undoStack.append(responsible)
-    def clearRedoQueue(self):
-        while(not self.redoQueue.empty()):
-            responsible = self.redoQueue.get()
-            responsible.clearRedoQueue()
+    def clearRedoStack(self):
+        while(not self.redoStack.empty()):
+            responsible = self.redoStack.get()
+            responsible.clearRedoStack()
             
     def delete(self):self.EPVModel.removeRows(self.currentIndex().row(),1,self.currentIndex().parent())
     def duplicate(self):self.currentEntry().duplicate()

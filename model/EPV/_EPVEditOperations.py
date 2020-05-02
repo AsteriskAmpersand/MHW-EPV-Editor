@@ -87,8 +87,8 @@ Are you sure you want to do this?""")
 
 def removeRows(self,row,count,parent):
     parentObj = self.access(parent)
-    if not self.movePending:
-        self.startRecording()
+    #if not self.movePending:
+    self.startRecording()
     if type(parentObj) is EPVGroup:
         op = lambda x: self.deleteRecord(parentObj,x)
     elif type(parentObj) is type(self):
@@ -98,7 +98,7 @@ def removeRows(self,row,count,parent):
     for ix in range(row,row+count):
         op(ix)
     self.endRecording()
-    self.movePending = False
+    #self.movePending = False
     return True
 
 def deleteGroup(self,groupIndex):
@@ -219,12 +219,12 @@ def dropMimeData(self, mimeData, dropAction, row, col, parent):
     if dropAction == Qt.MoveAction:
         if EPVMETADATA in mimeData.formats():
             if mimeData.source == self:
-                self.movePending = True
+                #self.movePending = True
                 self.startRecording()
                 result = self._dropData((row, col, parent),mimeData.internalPointer)
                 if not result: 
                     self.discardRecording()
-                    self.movePending = False
+                    #self.movePending = False
                 return result
     if dropAction == Qt.CopyAction:
         if EPVMETADATA  in mimeData.formats():

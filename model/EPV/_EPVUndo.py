@@ -5,7 +5,7 @@ Created on Wed Apr 29 20:07:54 2020
 @author: AsteriskAmpersand
 """
 from ._ComplexUndo import CompositeUndo
-from model.Queue import Queue
+from generic.Queue import Queue
 
 def startRecording(self):
     if not self.complexUndo:
@@ -29,12 +29,12 @@ def recordState(self,undoerFunction,undoerParameters,redoFunction,redoParameters
 def undo(self):
     undofunc,undoparam,redo,rparam = self.undoStack.pop()
     undofunc(*undoparam)
-    self.redoQueue.put((redo,rparam,undofunc,undoparam))
+    self.redoStack.put((redo,rparam,undofunc,undoparam))
     
 def redo(self):
-    redo,rparam,undofunc,undoparam = self.redoQueue.pop()
+    redo,rparam,undofunc,undoparam = self.redoStack.pop()
     redo(*rparam)
     self.undoStack.put((undofunc,undoparam,redo,rparam))
     
-def clearRedoQueue(self):
-    self.redoQueue = Queue()
+def clearRedoStack(self):
+    self.redoQueue = Stack()
