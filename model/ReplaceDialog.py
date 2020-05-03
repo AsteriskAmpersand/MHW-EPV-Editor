@@ -41,8 +41,8 @@ class ReplaceDialog(QDialog):
             op = self.references.getFiles
         else:
             op = self.references.getCurrentFile
-        self.results = {file:self.ui.ReplaceForm.replace(file) 
-                for file in (op())}
+        self.results = {file:self.ui.ReplaceForm.evaluate(file) 
+                for file in op()}
         return self.results
     
     def customize(self):

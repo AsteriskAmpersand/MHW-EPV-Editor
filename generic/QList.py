@@ -211,7 +211,34 @@ class QList(QAbstractListModel):
             for i,v in zip(range(startIndex,startIndex+len(data)),data):
                 self.assign(self.index(i,0,QModelIndex()),v)
         self.undoer.stopRecording()
-        
+    def insert(self,index,value):
+        self.insertData(value,index,assignContainer=True)
+    def remove(self,index):
+        self.removeRow(index,QModelIndex())
+    def find(self,value,start=0,end=None):
+        return self.list.index(value,start,end if end else len(self))
+    def count(self,value):
+        return self.count(value)
+    def pop(self,index=None):
+        if index == None:
+            index = len(self)-1
+        item = self[index]
+        self.remove(index)
+        return item
+    def reverse(self):
+        startindex = self.index(0,0,QModelIndex())
+        endindex = self.index(len(self)-1,0,QModelIndex())
+        self.undoer.recordEvent(self.reverse,())
+        self.list.reverse()
+        self.dataChanged.emit(startindex,endindex)
+    def __add__(self,listCompatible):
+        return QList(self.list+listCompatible)
+    def __radd__(self,listCompatible):
+        return QList(listCompatible + self.list)
+    def extend(self,iterator):
+        self.insertData(iterator)
+    def clear(self):
+        self.removeRows(0,len(self),QModelIndex)
     def append(self,value):
         self.insertData(value,assignContainer=True)
     def undo(self):
