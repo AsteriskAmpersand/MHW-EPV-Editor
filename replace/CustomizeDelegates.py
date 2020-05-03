@@ -8,19 +8,22 @@ from generic.RichTextDelegate import RichTextDisplay
 from replace.CustomizeModel import FindRole,ReplaceRole,
 from PyQt5.QtWidgets import QPlainTextEdit,QColorDialog
 from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QStyledItemDelegate
 
+BasicTextEntry TextEntry ColorEntry RGBAColorEntry
+ 
 class BasicReplaceText(ReplaceTextDelegate):
     BlockCountLimit = 1
 
 class ReplaceTextDelegate(RichTextDisplay):
     BlockCountLimit = 4
     def initStyleOption(self,options,index):
-        super().initStyleOption(options,index)
+        QtWidgets.QStyledItemDelegate.initStyleOption(self,options,index)
         options.text = index.data(ReplaceRole)
         
     def createEditor(self, parent, option, index):
         box = QPlainTextEdit(parent)
-        box.maximumBlockCount (self.BlockCountLimit)        
+        box.maximumBlockCount = self.BlockCountLimit     
         return box
 
     def setEditorData(self, editor, index):
@@ -33,7 +36,7 @@ class ReplaceTextDelegate(RichTextDisplay):
 
 class FindTextDelegate(RichTextDisplay):
     def initStyleOption(self,options,index):
-        super().initStyleOption(options,index)
+        RichTextDisplay.initStyleOption(self,options,index)
         options.text = index.data(FindRole)
 
 class ColorReplaceDelegate(ColorFindDelegate):

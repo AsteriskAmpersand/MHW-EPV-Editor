@@ -44,6 +44,9 @@ class CustomizeReplacement(QDialog):
         self.ui.actionRedo.connect(self.redo)
         self.ui.actionDelete.connect(self.remove)
     
+    def setDelegates(self):
+        pass
+    
     def undo(self):
         self.model.undo()
         

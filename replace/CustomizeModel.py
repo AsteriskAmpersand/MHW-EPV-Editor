@@ -15,6 +15,15 @@ ReplaceRole = 1+Qt.UserRole
 #EditRole supplies the replaced values
 #FindRole supplies the text for the find (including header)
 #ReplaceRole 
+BasicTextEntry TextEntry ColorEntry RGBAColorEntry
+
+class CustomizeFindDelegate(QStyledItemDelegate):
+    
+    pass
+
+class CustomizeReplaceDelegate(QStyledItemDelegate):
+    
+    pass    
 
 class ReplaceResultEntry():
     def __init__(self,file,dataIndex,replacementTarget):
@@ -84,6 +93,8 @@ class CustomizableResultsModel(QList):
         for index in multindex:
             if index.isValid():
                 self.removeRow(index.row(),QModelIndex())
+    def entryType(self,index):
+        return type(self.__access__(index))
     def flags(self,index):
         obj = self.__access__(index)
         if type(obj) is str:
