@@ -19,7 +19,7 @@ class RichTextDisplay(QtWidgets.QStyledItemDelegate):
         doc.setHtml(options.text)
 
         options.text = ""
-        style.drawControl(QtGui.QStyle.CE_ItemViewItem, options, painter);
+        style.drawControl(QtWidgets.QStyle.CE_ItemViewItem, options, painter);
 
         ctx = QtGui.QAbstractTextDocumentLayout.PaintContext()
 
@@ -27,7 +27,7 @@ class RichTextDisplay(QtWidgets.QStyledItemDelegate):
         #if (optionV4.state & QStyle::State_Selected)
             #ctx.palette.setColor(QPalette::Text, optionV4.palette.color(QPalette::Active, QPalette::HighlightedText));
 
-        textRect = style.subElementRect(QtGui.QStyle.SE_ItemViewItemText, options)
+        textRect = style.subElementRect(QtWidgets.QStyle.SE_ItemViewItemText, options)
         painter.save()
         painter.translate(textRect.topLeft())
         painter.setClipRect(textRect.translated(-textRect.topLeft()))
@@ -36,7 +36,7 @@ class RichTextDisplay(QtWidgets.QStyledItemDelegate):
         painter.restore()
 
     def sizeHint(self, option, index):
-        options = QtGui.QStyleOptionViewItemV4(option)
+        options = QtWidgets.QStyleOptionViewItem (option)
         self.initStyleOption(options,index)
 
         doc = QtGui.QTextDocument()

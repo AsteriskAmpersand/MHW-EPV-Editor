@@ -5,7 +5,6 @@ Created on Wed Apr 22 16:45:22 2020
 @author: AsteriskAmpersand
 """
 
-import sys
 from itertools import chain
 from pathlib import Path
 from generic.Queue import Queue,Stack
@@ -23,7 +22,7 @@ def functionChain(functionList):
     for function in functionList:
         function()
         
-        
+import sys 
 def catch_exceptions(t, val, tb):
     QtWidgets.QMessageBox.critical(None,
                                    "An exception was raised",
@@ -165,13 +164,24 @@ class EPVTab(QtWidgets.QWidget):
     def enableGroup(self): self.toggleGroup(True)
     
 # =============================================================================
+# Main - Search Functionality
+# =============================================================================
+
+    def getStringReferences(self,join=False):
+        return self.EPVModel.getStringReferences(join)
+    def getColorReferences(self,alpha=False):
+        return self.EPVModel.getColorReferences(alpha)
+    def replace(self,replacements):
+        pass
+    
+# =============================================================================
 # Main - Edit Functionality
 # =============================================================================
     
     def actionPushed(self,responsible):
         self.changed = True
         self.undoStack.append(responsible)
-        self.clearredoStack()
+        self.clearRedoStack()
     def undo(self):
         if self.undoStack.empty():
             return
@@ -236,8 +246,11 @@ class EPVTab(QtWidgets.QWidget):
         with open(path,"wb") as outf:
             outf.write(self.EPVModel.serialize())
         return
-    def SaveAs(self):                
-        filename = QFileDialog.getSaveFileName(self,_translate("EPVTab","Save EPV3"),"",_translate("EPVTab","MHW EPV3 (*.epv3)"))
+    def SaveAs(self):
+        root = ""
+        if self.path:
+            root = str(Path(self.path).parent)
+        filename = QFileDialog.getSaveFileName(self,_translate("EPVTab","Save EPV3"),root,_translate("EPVTab","MHW EPV3 (*.epv3)"))
         if filename[0]:
             filename = Path(filename[0])
             if filename.exists():

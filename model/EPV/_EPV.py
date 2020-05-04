@@ -34,7 +34,7 @@ class EPV(QtCore.QAbstractItemModel):
     from ._EPVUndo import (clearRedoStack,discardRecording,endRecording,recordState,redo,startRecording,undo)
     from ._EPVEditOperations import (_deleteGroup,_deleteRecord,_dropData,_insertGroup,_insertRecord,_replaceRecord,canDropMimeData,deleteGroup,deleteRecord,dropIntoQuery,dropMimeData,flags,hexRepresent,insertGroup,insertRecord,mimeData,mimeTypes,moveinto,newGroup,newRecord,removeRows,replaceRecord,supportedDropActions)
     from ._EPVCopyStack import (deepcopy,mixedStackQuery,pastePureStack,pasteStack)
-    
+    from ._EPVSearchOperations import (getStringReferences,getColorReferences)
     
     def __init__(self, parent = None, filepath = None):
         super().__init__(parent)
@@ -131,7 +131,7 @@ class EPV(QtCore.QAbstractItemModel):
         else:
             return index.internalPointer()[index.row()]
     
-    def index(self, row, column, parent=QtCore.QModelIndex):
+    def index(self, row, column, parent=QtCore.QModelIndex()):
         if not self.hasIndex(row, column, parent):
             return QtCore.QModelIndex()
         if not parent.isValid():

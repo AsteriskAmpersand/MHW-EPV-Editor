@@ -85,7 +85,6 @@
      <string>Search</string>
     </property>
     <addaction name="actionFind"/>
-    <addaction name="actionFind_Next"/>
     <addaction name="actionReplace"/>
     <addaction name="actionBatch_Replace"/>
    </widget>

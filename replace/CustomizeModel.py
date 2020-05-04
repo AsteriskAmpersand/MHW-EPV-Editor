@@ -7,23 +7,27 @@ Created on Sat May  2 14:08:05 2020
 
 from generic.QList import QList
 from PyQt5.QtCore import Qt, QModelIndex
-from replace.enums import BasicText,FullText,Color,RGBAColor
-
+from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtGui import QColor
+from replace.ReplaceEnums import BasicText,FullText,Color,RGBAColor
 FindRole = 0+Qt.UserRole
 ReplaceRole = 1+Qt.UserRole
 
 #EditRole supplies the replaced values
 #FindRole supplies the text for the find (including header)
 #ReplaceRole 
-BasicTextEntry TextEntry ColorEntry RGBAColorEntry
+#BasicTextEntry TextEntry ColorEntry RGBAColorEntry
 
-class CustomizeFindDelegate(QStyledItemDelegate):
-    
-    pass
+import sys 
+def catch_exceptions(t, val, tb):
+    QMessageBox.critical(None,
+                                   "An exception was raised",
+                                   "Exception type: {}".format(tb))
+    old_hook(t, val, tb)
 
-class CustomizeReplaceDelegate(QStyledItemDelegate):
-    
-    pass    
+
+old_hook = sys.excepthook
+sys.excepthook = catch_exceptions
 
 class ReplaceResultEntry():
     def __init__(self,file,dataIndex,replacementTarget):
@@ -47,9 +51,9 @@ class BasicTextEntry(ReplaceResultEntry):
     def validate(self,text):
         return text
     def displayFind(self,dataPath,findText):
-        return str(dataPath)+"\n"+findText
-    def displayReplace(self,findText):
-        return "\n"+findText    
+        return "\t"+str(dataPath)+"\n"+findText
+    def displayReplace(self,replaceText):
+        return "\n"+replaceText    
         
 class TextEntry(BasicTextEntry):
     def validate(self,text):
@@ -57,15 +61,23 @@ class TextEntry(BasicTextEntry):
         if len(results) > 4:
             results[:4]
         results = results + [""]*(4-len(results))
-        return results
-    def displayReplace(self,findText):
-        return "\n"+"\n".join(self.validate(findText))
+        return "\n".join(results)
+    def displayReplace(self,replaceText):
+        return "\n"+self.validate(replaceText)
     
 class ColorEntry(ReplaceResultEntry):
+    def validate(self,values):
+        return values
     def displayFind(self,dataPath,findColor):
-        return tuple([dataPath]+list(findColor))
+        return (dataPath,findColor)
     def displayReplace(self,replaceColor):
-        return replaceColor
+        return ("",replaceColor)
+    def getRole(self,role):
+        if role == Qt.BackgroundColorRole:
+            color = QColor("FFFFFF")
+            color.setAlpha(0)
+            return color
+        return super().getRole(role)
     
 class RGBAColorEntry(ColorEntry):
     pass
@@ -73,14 +85,14 @@ class RGBAColorEntry(ColorEntry):
 class CustomizableResultsModel(QList):
     def __init__(self,data,*args,**kwargs):
         entries = []
-        for file,datamass in data:
-            entries.append(file.path)
+        for file,datamass in data.items():
+            entries.append(str(file.path))
             for index,replaceval in datamass:
                 typing = index.getType()
                 entryType = {BasicText:BasicTextEntry,FullText:TextEntry,
                 Color:ColorEntry, RGBAColor:RGBAColorEntry}[typing]
                 entries.append(entryType(file,index,replaceval))
-        super.__init__(entries,*args,**kwargs)
+        super().__init__(entries,*args,**kwargs)
     def compile(self):
         results = {}
         for entry in self:

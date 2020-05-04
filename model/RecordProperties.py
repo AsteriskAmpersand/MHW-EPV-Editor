@@ -6,7 +6,7 @@ Created on Sun Apr 26 23:55:32 2020
 """
 from PyQt5.QtWidgets import QWidget
 from PyQt5 import QtCore
-from generic.Queue import Queue
+from generic.Queue import Queue,Stack
 
 
 

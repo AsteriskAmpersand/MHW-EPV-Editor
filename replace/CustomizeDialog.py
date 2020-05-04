@@ -8,12 +8,27 @@ Created on Fri May  1 21:49:34 2020
 
 import sys
 
-from gui.EPVCustomizeReplacement import Ui_Dialog
+from gui.CustomizeReplacement import Ui_Dialog
 from replace.CustomizeModel import CustomizableResultsModel
+from replace.CustomizeDelegates import CustomizeFindDelegate,CustomizeReplaceDelegate
 
 #from PyQt5 import uic, QtWidgets, QtGui, QtCore
-from PyQt5.QtWidgets import QDialog, QApplication, QAbstractItemView
-        
+from PyQt5.QtWidgets import QDialog, QApplication, QAbstractItemView,QMessageBox
+
+def catch_exceptions(t, val, tb):
+    QMessageBox.critical(None,
+                       "An exception was raised",
+                       "Exception type: {}".format(tb))
+    old_hook(t, val, tb)
+
+
+old_hook = sys.excepthook
+sys.excepthook = catch_exceptions
+
+test = lambda x:         QMessageBox.critical(None,
+                           "Test",
+                           "Test%d"%x)
+
 class CustomizeReplacement(QDialog):
     def __init__(self, baseReplacements, *args):
         super().__init__(*args)
@@ -21,31 +36,38 @@ class CustomizeReplacement(QDialog):
         
         self.ui = Ui_Dialog()
         self.ui.setupUi(self)
-        
-        self.connectSignals()        
+        self.ui.Before.setModel(self.model)
+        self.ui.After.setModel(self.model)
+        self.connectSignals()
+        self.setDelegates()
         self.show()
         
     def connectSignals(self):
-        self.ui.Cancel.connect(self.reject())
-        self.ui.Accept.connect(self.replace)
-        self.ui.Reset.connect(self.reset)
-        self.ui.Remove.connect(self.remove)
+        self.ui.Cancel.pressed.connect(self.reject)
+        self.ui.Accept.pressed.connect(self.replace)
+        self.ui.Reset.pressed.connect(self.reset)
+        self.ui.Remove.pressed.connect(self.remove)
         
+        self.ui.Before.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.ui.After.setSelectionModel(self.ui.Before.selectionModel())
-        self.ui.After.setSelectionMode(QAbstractItemView.ExtendedSelection)
+
         beforeBar = self.ui.Before.verticalScrollBar()
         afterBar = self.ui.After.verticalScrollBar()
         beforeBar.valueChanged.connect(afterBar.setValue)
         afterBar.valueChanged.connect(beforeBar.setValue)
+
+        self.ui.Before.setEditTriggers(QAbstractItemView.NoEditTriggers)
+
+        self.ui.Before.setWordWrap(False)
+        self.ui.After.setWordWrap(False)
+
+        self.ui.actionUndo.triggered.connect(self.undo)
+        self.ui.actionRedo.triggered.connect(self.redo)
+        self.ui.actionDelete.triggered.connect(self.remove)
         
-        self.setDelegates()
-        
-        self.ui.actionUndo.connect(self.undo)
-        self.ui.actionRedo.connect(self.redo)
-        self.ui.actionDelete.connect(self.remove)
-    
     def setDelegates(self):
-        pass
+        self.ui.Before.setItemDelegate(CustomizeFindDelegate())
+        self.ui.After.setItemDelegate(CustomizeReplaceDelegate())
     
     def undo(self):
         self.model.undo()

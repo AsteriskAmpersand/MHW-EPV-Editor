@@ -13,9 +13,12 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
+  <property name="modal">
+   <bool>true</bool>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_7">
    <item>
-    <widget class="EPVReplaceForm" name="ReplaceForm" native="true">
+    <widget class="ReplaceForm" name="ReplaceForm" native="true">
      <property name="minimumSize">
       <size>
        <width>220</width>
@@ -64,9 +67,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>EPVReplaceForm</class>
+   <class>ReplaceForm</class>
    <extends>QWidget</extends>
-   <header>model.EPVReplaceSelector</header>
+   <header>replace.ReplaceSelector</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

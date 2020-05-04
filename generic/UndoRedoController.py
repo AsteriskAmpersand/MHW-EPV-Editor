@@ -95,15 +95,22 @@ class InvertingUndoRedoController(UndoRedoController):
         self.Forward = True
         super().__init__()
     def undo(self):
-        self.Forward = False
-        undoF,undoP = self.undoStack.get()
-        undoF(*undoP)
-        self.redoStack.put(self.undoStack.get())
-        self.Forward = True
+        if not self.undoStack.empty():
+            self.Forward = False
+            undoF,undoP = self.undoStack.get()
+            undoF(*undoP)
+            self.redoStack.put(self.undoStack.get())
+            self.Forward = True
+            return True
+        else:
+            return False
     def redo(self):
-        #print(self.redoStack)
-        doF,doP = self.redoStack.get()
-        doF(*doP)
+        if not self.redoStack.empty():
+            doF,doP = self.redoStack.get()
+            doF(*doP)
+            return True
+        else:
+            return False
     def recordEvent(self,undoF,undoP):
         if self.Forward:
             self.clearRedoStack()
@@ -126,11 +133,15 @@ class ExplicitUndoRedoController(UndoRedoController):
             self.do(self.undoStack.get,
                     self.redoStack.put,
                     1)
+            return True
+        return False
     def redo(self):
         if not self.redoStack.empty():
             self.do(self.redoStack.get,
                     self.undoStack.put,
                     0)   
+            return True
+        return False
     def recordEvent(self,doF,doP,undoF,undoP):
         if self.disabled:
             return
@@ -154,4 +165,4 @@ class ExplicitUndoRedoController(UndoRedoController):
     def clearRedoStack(self):
         if self.disabled:
             return
-        super().clearredoStack(self)
+        super().clearRedoStack(self)

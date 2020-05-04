@@ -12,6 +12,7 @@ from pathlib import Path
 from gui.Main import Ui_MainWindow
 from model.EPVTab import EPVTab
 from generic.Queue import CopyStack
+from replace.ReplaceDialog import ReplaceDialog
 from splash.Splash import SplashScreen
 
 from PyQt5 import uic, QtWidgets, QtGui, QtCore
@@ -69,6 +70,11 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.ui.actionNew_Group.triggered.connect(self.newGroup)
         self.ui.actionNew_Record.triggered.connect(self.newRecord)
+        
+        #Find Menu
+        self.ui.actionFind.triggered.connect(self.Find)
+        self.ui.actionReplace.triggered.connect(self.Replace)
+        self.ui.actionBatch_Replace.triggered.connect(self.BatchReplace)
     
     def connectSignals(self):
         self.ui.fileTabs.tabCloseRequested.connect(self.closeTab)
@@ -133,7 +139,26 @@ class MainWindow(QtWidgets.QMainWindow):
         self.copyStack.clear()
     def newGroup(self):self.currentWidget().newGroup()
     def newRecord(self):self.currentWidget().newRecord()
-        
+      
+# =============================================================================
+# Find Block
+# =============================================================================
+    
+    def Find(self):
+        pass
+    def Replace(self):
+        replacementDialog = ReplaceDialog(self,self)
+        replace = replacementDialog.exec()
+        if replace:
+            replacements = replacementDialog.results
+            for file in replacements:
+                file.replace(replacements[file])
+    def BatchReplace(self):
+        pass
+    def getCurrentFile(self):
+        return self.currentWidget()
+    def getFiles(self):
+        return [self.ui.fileTabs.widget(i) for i in range(self.ui.fileTabs.count())]
 # =============================================================================
 # Housekeeping Blcok
 # =============================================================================
@@ -166,7 +191,7 @@ if __name__ == '__main__':
     response = splash.exec()
     if not response:
         sys.exit(app.exec_())
-        
+    """
     app.setStyle("Fusion")
     
     # Now use a palette to switch to dark colors:
@@ -185,7 +210,7 @@ if __name__ == '__main__':
     palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
     palette.setColor(QPalette.HighlightedText, QtCore.Qt.black)
     app.setPalette(palette)
-    
+    """
     window = MainWindow(args)
     #tab = EPVTab(self,r"E:\MHW\chunkG0\pl\f_equip\pl124_0000\body\epv\f_body124.epv3")
     #self.ui.fileTabs.addTab(tab,"Test") 

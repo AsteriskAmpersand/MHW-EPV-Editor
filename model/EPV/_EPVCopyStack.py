@@ -56,7 +56,7 @@ def pastePureStack(self,index,copyStack):
             args = lambda entry: (target,deepcopy(entry))
         elif type(target) is EPVRecord:
             args = lambda entry: (target.__parent__,deepcopy(entry),target.row()+1)   
-            print(target.__parent__)
+            #print(target.__parent__)
     for entry in copyStack.consume():
         op(*args(entry))
         

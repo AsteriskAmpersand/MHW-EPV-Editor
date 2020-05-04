@@ -33,9 +33,9 @@ class EPVCEntry(RecordProperties):
     def color(self,value):
         self.ui.colorTool.setStyleSheet("border: none; background-color: #%02X%02X%02X"%value)
     @property
-    def alpha(self): return int(self.ui.alpha.value()/100*255)
+    def alpha(self): return self.ui.alpha.value()
     @alpha.setter
-    def alpha(self,value):self.ui.alpha.setValue(value/255*100)
+    def alpha(self,value):self.ui.alpha.setValue(value)
     @property
     def saturation(self): return self.ui.saturation.value()
     @saturation.setter

@@ -127,7 +127,6 @@ class Ui_MainWindow(object):
         self.menuHelp.addAction(self.actionAbout)
         self.menuHelp.addAction(self.actionScripting)
         self.menuSearch.addAction(self.actionFind)
-        self.menuSearch.addAction(self.actionFind_Next)
         self.menuSearch.addAction(self.actionReplace)
         self.menuSearch.addAction(self.actionBatch_Replace)
         self.menubar.addAction(self.menuOpen.menuAction())

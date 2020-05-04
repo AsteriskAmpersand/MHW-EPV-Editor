@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'EPVCustomizeReplacement.ui'
+# Form implementation generated from reading ui file 'CustomizeReplacement.ui'
 #
 # Created by: PyQt5 UI code generator 5.7.1
 #
@@ -12,6 +12,7 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
         Dialog.resize(642, 660)
+        Dialog.setModal(True)
         self.verticalLayout = QtWidgets.QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName("verticalLayout")
         self.splitter = QtWidgets.QSplitter(Dialog)

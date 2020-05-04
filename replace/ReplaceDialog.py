@@ -9,7 +9,7 @@ import sys
 import os
 
 from gui.EPVReplace import Ui_Dialog
-from model.CustomizeReplacement import CustomizeReplacement
+from replace.CustomizeDialog import CustomizeReplacement
 #from PyQt5 import uic, QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QDialog, QApplication
 from PyQt5.QtGui import QDesktopServices
@@ -28,9 +28,9 @@ class ReplaceDialog(QDialog):
         self.show()
         
     def connectSignals(self):
-        self.ui.Cancel.connect(self.reject())
-        self.ui.Customize.connect()
-        self.ui.Replace.connect(self.replace)
+        self.ui.Cancel.pressed.connect(self.reject)
+        self.ui.Customize.pressed.connect(self.customize)
+        self.ui.Replace.pressed.connect(self.replace)
         
     def replace(self):
         self._replace()
@@ -38,9 +38,9 @@ class ReplaceDialog(QDialog):
         
     def _replace(self):
         if self.ui.ApplyToAll.checkState():
-            op = self.references.getFiles
+            op = self.reference.getFiles
         else:
-            op = self.references.getCurrentFile
+            op = lambda: [self.reference.getCurrentFile()]
         self.results = {file:self.ui.ReplaceForm.evaluate(file) 
                 for file in op()}
         return self.results
@@ -49,7 +49,7 @@ class ReplaceDialog(QDialog):
         results = self._replace()
         customize = CustomizeReplacement (results)
         result = customize.exec()
-        if result == QDialog.Accepted():
+        if result == QDialog.Accepted:
            self.results = customize.results
            self.accept()
         

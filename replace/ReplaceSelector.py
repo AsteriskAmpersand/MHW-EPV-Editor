@@ -12,24 +12,24 @@ import re
 from pathlib import Path
 from math import sqrt
 
-from model.ReplaceEnums import TEXT,COLOR
-from gui.EPVReplaceForm import Ui_Form
+from replace.ReplaceEnums import TEXT,COLOR
+from gui.ReplaceForm import Ui_Form
 
 from PyQt5.QtWidgets import QWidget, QColorDialog, QApplication
 from PyQt5 import QtCore
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QColor,QIcon
 
-class EPVReplaceForm(QWidget):
+class ReplaceForm(QWidget):
     def __init__(self, *args):
         super().__init__(*args)
-        self.color1 = "#FFFFFF"
-        self.color2 = "#FFFFFF"
+        self.color1 = "#FFFFFFFF"
+        self.color2 = "#FFFFFFFF"
         self.ui = Ui_Form()
         self.ui.setupUi(self)
         
-        self.ui.AlphaFind.setEnabled(False)
-        self.ui.AlphaReplace.setEnabled(False)
+        #self.ui.AlphaFind.setEnabled(False)
+        #self.ui.AlphaReplace.setEnabled(False)
         
         self.connectSignals()
         
@@ -38,22 +38,28 @@ class EPVReplaceForm(QWidget):
     def connectSignals(self):
         self.ui.ColorFind.pressed.connect(lambda: self.paletteChange(self.ui.ColorFind,"color1"))
         self.ui.ColorFind_2.pressed.connect(lambda: self.paletteChange(self.ui.ColorFind_2,"color2"))
-        self.ui.AlphaEnable.stateChanged.connect(self.alphaToggled)
+        #self.ui.AlphaEnable.stateChanged.connect(self.alphaToggled)
         #ColorFind2
     #ColorFind ColorFind2
     
-    def alphaToggled(self):
-        self.ui.AlphaFind.setEnabled(self.ui.AlphaEnable.checkState())
-        self.ui.AlphaReplace.setEnabled(self.ui.AlphaEnable.checkState())
+    #def alphaToggled(self):
+    #    self.ui.AlphaFind.setEnabled(self.ui.AlphaEnable.checkState())
+    #    self.ui.AlphaReplace.setEnabled(self.ui.AlphaEnable.checkState())
     
-    def paletteChange(self,reference,prop):
-        color = QColorDialog.getColor(QColor(getattr(self,prop)))
+    def paletteChange(self,finder,prop):
+        alpha = self.ui.AlphaEnable.checkState()
+        if alpha:
+            color = QColorDialog.getColor(QColor(getattr(self,prop)),options = QColorDialog.ShowAlphaChannel)
+        else:
+            color = QColorDialog.getColor(QColor(getattr(self,prop)))
         if color.isValid():
-            stylesheetColor = color.name()
-            reference.setStyleSheet("border: none; background-color: %s"%stylesheetColor)
+            stylesheetColor = color.name(QColor.HexRgb if not alpha else QColor.HexArgb)
+            finder.setStyleSheet("border: none; background-color: %s"%stylesheetColor)
             setattr(self,prop,stylesheetColor)
             
     def colorDistance(self,c1,c2):
+        if len(c1)>3:
+            if c1[3]!=c2[3]: return 767
         rmean = ( c1[0] + c2[0] ) // 2;
         r = c1[0] - c2[0]
         g = c1[1] - c2[1]
@@ -82,38 +88,38 @@ class EPVReplaceForm(QWidget):
             stringbefore = string
             stringafter = op(string)
             if stringbefore != stringafter:
-                results.append(ref,stringafter)
+                results.append((ref,stringafter))
         return results
     
     def colorReplace(self,find,replace,color):
-        if self.ui.AlphaEnable.checkState():
-            color, alpha = color
-            find, falpha = find, self.ui.AlphaFind.value()
-            replace, ralpha = replace, self.ui.AlphaReplace.value()
-            if alpha - falpha > 0.001: return color,alpha
-            else: alpha = ralpha
-        if self.colorDistance(color,find)<self.ui.ColorTolerance.value():
-            return (replace,ralpha) if self.ui.AlphaEnable.checkState() else replace
+        if self.colorDistance(color,find)<=self.ui.ColorTolerance.value():
+            return replace
+        return color
     
     def evaluateColor(self,reference):
         results = []
-        prism = lambda x: (x.red(),x.green(),x.blue())
+        if self.ui.AlphaEnable.checkState():
+            prism = lambda x: (x.red(),x.green(),x.blue(),x.alpha())
+        else:
+            prism = lambda x: (x.red(),x.green(),x.blue())
         colorFind = prism(QColor(self.color1))
         colorReplace = prism(QColor(self.color2))
         for ref,color in reference.getColorReferences(self.ui.AlphaEnable.checkState()):
             colorbefore = color
             colorafter = self.colorReplace(colorFind,colorReplace,color)
-            if colorbefore != colorafter:
-                results.append(ref,colorafter)
+            #print(colorbefore)
+            #print(colorafter)
+            if list(colorbefore) != list(colorafter):
+                results.append((ref,colorafter))
         return results            
         
     def evaluate(self,reference):
         #currentMode = self.ui.tabWidget.currentWidget()
-        mode = {"Text":TEXT,"Color":COLOR}[self.ui.tabWidget.currentTabText()]
+        mode = {"Text":TEXT,"Color":COLOR}[self.ui.tabWidget.tabText(self.ui.tabWidget.currentIndex())]
         if mode == TEXT: return self.evaluateText(reference)
         elif mode == COLOR: return self.evaluateColor(reference)
 
 if "__main__" in __name__:    
     app = QApplication(sys.argv)
-    window = EPVReplaceForm(None)
+    window = ReplaceForm(None)
     sys.exit(app.exec_())

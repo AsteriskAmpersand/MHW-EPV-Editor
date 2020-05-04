@@ -12,9 +12,10 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
         Dialog.resize(648, 259)
+        Dialog.setModal(True)
         self.verticalLayout_7 = QtWidgets.QVBoxLayout(Dialog)
         self.verticalLayout_7.setObjectName("verticalLayout_7")
-        self.ReplaceForm = EPVReplaceForm(Dialog)
+        self.ReplaceForm = ReplaceForm(Dialog)
         self.ReplaceForm.setMinimumSize(QtCore.QSize(220, 185))
         self.ReplaceForm.setObjectName("ReplaceForm")
         self.verticalLayout_7.addWidget(self.ReplaceForm)
@@ -48,7 +49,7 @@ class Ui_Dialog(object):
         self.Customize.setText(_translate("Dialog", "Customize Replace"))
         self.Cancel.setText(_translate("Dialog", "Cancel"))
 
-from model.EPVReplaceSelector import EPVReplaceForm
+from replace.ReplaceSelector import ReplaceForm
 
 if __name__ == "__main__":
     import sys

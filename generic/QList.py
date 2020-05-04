@@ -8,6 +8,19 @@ Created on Sat May  2 03:12:05 2020
 from PyQt5.QtCore import QAbstractListModel,QModelIndex,Qt,QVariant
 from generic.UndoRedoController import InvertingUndoRedoController
 
+from PyQt5.QtWidgets import QDialog, QApplication, QAbstractItemView,QMessageBox
+
+import sys
+def catch_exceptions(t, val, tb):
+    QMessageBox.critical(None,
+                       "An exception was raised",
+                       "Exception type: {}".format(tb))
+    old_hook(t, val, tb)
+
+
+old_hook = sys.excepthook
+sys.excepthook = catch_exceptions
+
 def iterable(ob):
     try:
         iter(ob)
@@ -93,7 +106,8 @@ class QList(QAbstractListModel):
             return QVariant()
         ix = index.row()
         if type(self.list[ix]) in self.supportedBuiltins:
-            return self.list[ix]
+            if role == Qt.DisplayRole or role == Qt.EditRole:
+                return self.list[ix]
         else:
             return self.list[ix].getRole(role)
     
@@ -247,15 +261,19 @@ class QList(QAbstractListModel):
         self.undoer.redo()
     def clearRedo(self):
         self.undoer.clearRedoQueue()
+    def reset(self):
+        while(self.undoer.undo()):
+            pass
 
 if __name__ in "__main__":
+    from PyQt5 import QtWidgets
+    app = QtWidgets.QApplication(sys.argv)
+    args = app.arguments()[1:]
+    
     a = QList([12,3,4])
-    b = QList()
-    b.append(3)
-    b[0:0] = 12
-    b[2:2] = [4]
-    print(a==b)
-    b.undo()
-    print(b)
-    b.redo()
-    print(b)
+    from PyQt5.QtWidgets import QListView
+    view = QListView()
+    view.setModel(a)
+    view.show()
+    
+    sys.exit(app.exec_())

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>358</width>
+    <width>304</width>
     <height>40</height>
    </rect>
   </property>
@@ -81,21 +81,21 @@
        </property>
        <item>
         <widget class="QToolButton" name="colorTool">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text">
           <string/>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QDoubleSpinBox" name="alpha">
-         <property name="decimals">
-          <number>1</number>
-         </property>
+        <widget class="QSpinBox" name="alpha">
          <property name="maximum">
-          <double>100.000000000000000</double>
-         </property>
-         <property name="value">
-          <double>100.000000000000000</double>
+          <number>255</number>
          </property>
         </widget>
        </item>
