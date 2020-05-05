@@ -31,16 +31,12 @@ class RecordIDs(RecordProperties):
     def connect(self,gmodel,rmodel=None):
         self.gmodel = gmodel
         self.rmodel = rmodel        
-        if gmodel:
-            self.disconnectGroupSignals()
-            self.fromGModel()
-            self.connectGroupSignals()
+        if gmodel:            
+            self.fromGModel()            
         else:
             self.disconnectGroupSignals()
         if rmodel:
-            self.disconnectRecordSignals()
             self.fromRModel()
-            self.connectRecordSignals()
         else:
             self.disconnectRecordSignals()
     rproperties = ["recordID","trailID","boneID"]
@@ -101,7 +97,10 @@ class RecordIDs(RecordProperties):
             self.rfunctors.append(self.valueChangedGenerator(prop))
         self.connectSignals(self.rfunctors,self.rproperties)
     def disconnectRecordSignals(self):self.disconnectSignals(self.rfunctors,self.rproperties)
-    def fromRModel(self,prop=None):self.fromModel(self.rmodel,self.rproperties,prop)
+    def fromRModel(self,prop=None):
+        self.disconnectRecordSignals()
+        self.fromModel(self.rmodel,self.rproperties,prop)
+        self.connectRecordSignals()
     def toRModel(self,prop=None):self.toModel(self.rmodel,self.rproperties,prop)
     
     def connectGroupSignals(self):
@@ -110,8 +109,12 @@ class RecordIDs(RecordProperties):
             self.gfunctors.append(self.valueChangedGenerator(prop))
         self.connectSignals(self.gfunctors,self.gproperties)
     def disconnectGroupSignals(self):self.disconnectSignals(self.gfunctors,self.gproperties)
-    def fromGModel(self,prop=None):self.fromModel(self.gmodel,self.gproperties,prop)
-    def toGModel(self,prop=None):self.toModel(self.gmodel,self.gproperties,prop)
+    def fromGModel(self,prop=None):
+        self.disconnectGroupSignals()
+        self.fromModel(self.gmodel,self.gproperties,prop)
+        self.connectGroupSignals()
+    def toGModel(self,prop=None):
+        self.toModel(self.gmodel,self.gproperties,prop)
 
     def valueChangedGenerator(self,prop):
         def changed(newval):

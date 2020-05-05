@@ -10,12 +10,16 @@ class MetaIndex():
     def __init__(self,index,rindex):
         self.rindex = rindex
         self.index = index
+    def IDPair(self):
+        return self.index.parent().row(),self.index.row()
     def dataPath(self):
         string = "" if self.rindex == -1 else "- Slot: %d"%self.rindex
         return "Group: %d - Record: %d%s"%(self.index.parent().row(),self.index.row(),string)
     def findValue(self):
         return NotImplementedError
     def getType(self):
+        return NotImplementedError
+    def replace(self,content):
         return NotImplementedError
     
 class PathIndex(MetaIndex):
@@ -28,16 +32,24 @@ class PathIndex(MetaIndex):
         else:
             path = getattr(record,"path%d"%self.rindex)
         return path
+    def replace(self,value):
+        self.index.model().pathReplace(self.index,self.rindex,value)
+    
 class ColorIndex(MetaIndex):
     def getType(self):
         return Color
     def findValue(self):
         record = self.index.model().access(self.index)
         return record.epvc[self.rindex].color[:3]
+    def replace(self,value):
+        self.index.model().colorReplace(self.index,self.rindex,value)
+    
 class RGBAIndex(MetaIndex):
     def getType(self):
         return RGBAColor
     def findValue(self):
         record = self.index.model().access(self.index)
         epvc = record.epvc[self.rindex]
-        return epvc.color
+        return (*epvc.color,epvc.alpha)
+    def replace(self,value):
+        self.index.model().colorReplace(self.index,self.rindex,value)

@@ -73,6 +73,8 @@ class EPVTab(QtWidgets.QWidget):
         self.EPVModel.undoableAction.connect(self.actionPushed)
         self.ui.recordBrowser.selectionModel().currentChanged.connect(self.selectionChanged)
         self.EPVModel.idEdited.connect(self.updateIDs)
+        self.EPVModel.epvEdited.connect(self.updateEPVC)
+        self.EPVModel.pathEdited.connect(self.updatePath)
         #Connect the view selection changes to update the pseudo-views
     
     def accessEPV(self,current):
@@ -92,7 +94,13 @@ class EPVTab(QtWidgets.QWidget):
         group,record = self.accessEPV(index)
         ix = self.ui.recordBrowser.selectionModel().currentIndex()
         self.ui.RecordIDs.IDUpdated(group,record,ix==index)
-            
+    
+    def updateEPVC(self,index,rindex):
+        if index == self.currentIndex():
+            self.ui.efxSlots.itemWidget(self.ui.efxSlots.item(rindex)).fromModel()
+    def updatePath(self,index,pindex):
+        if index == self.currentIndex():
+            self.ui.efxPathsGroup.fromModel()
     
     def selectionChanged(self,current,previous):
         selected = self.EPVModel.access(current)
@@ -172,7 +180,10 @@ class EPVTab(QtWidgets.QWidget):
     def getColorReferences(self,alpha=False):
         return self.EPVModel.getColorReferences(alpha)
     def replace(self,replacements):
-        pass
+        self.EPVModel.startReplace()
+        for metaindex,content in replacements:
+            metaindex.replace(content)
+        self.EPVModel.endReplace()
     
 # =============================================================================
 # Main - Edit Functionality
@@ -232,6 +243,8 @@ class EPVTab(QtWidgets.QWidget):
             return selection[0]
         else:
             return QtCore.QModelIndex()
+    def setCurrentIndex(self,index):
+        self.ui.recordBrowser.setCurrentIndex(index)
     def selectNextGroup(self):
         current = self.currentIndex()
         if not current.isValid():

@@ -76,22 +76,20 @@ class PropertyWidget(RecordProperties):
     def connect(self,model):
         self.model = model
         if model:
-            self.fromModel()       
-            self.connectSignals()
+            self.fromModel()
         else:
             self.disconnectSignals()
-            pass
     def fromModel(self):
+        self.disconnectSignals()
         prop = getattr(self.model,self.propertyName)
         if not(iterable(prop)):
             prop = [prop]
             #print("%d/%d"%(len(prop),self.horizontalLayout.count()))
         for w,p in zip(layout_widgets(self.horizontalLayout),prop):
             w.setValue(p)
-    def valueChanged(self):
-        self.recordState(self.propertyName)
-        self.undoableAction.emit(self)
-        self.toModel()
+        self.connectSignals()
+    def valueChanged(self,newval):
+        super().valueChanged(self.propertyName,newval)
     def toModel(self):
         prop = list(layout_widgets(self.horizontalLayout))
         if len(prop) == 1:

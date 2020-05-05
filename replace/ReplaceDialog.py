@@ -15,6 +15,7 @@ from PyQt5.QtWidgets import QDialog, QApplication
 from PyQt5.QtGui import QDesktopServices
 from PyQt5.QtCore import Qt,QUrl
 #from PyQt5.QtCore import QFile, QTextStream
+from collections import OrderedDict
 
 class ReplaceDialog(QDialog):
     def __init__(self, reference, *args):
@@ -41,8 +42,8 @@ class ReplaceDialog(QDialog):
             op = self.reference.getFiles
         else:
             op = lambda: [self.reference.getCurrentFile()]
-        self.results = {file:self.ui.ReplaceForm.evaluate(file) 
-                for file in op()}
+        self.results = OrderedDict([(file,self.ui.ReplaceForm.evaluate(file) )
+                for file in op()])
         return self.results
     
     def customize(self):

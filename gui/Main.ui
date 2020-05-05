@@ -86,13 +86,20 @@
     </property>
     <addaction name="actionFind"/>
     <addaction name="actionReplace"/>
-    <addaction name="actionBatch_Replace"/>
+   </widget>
+   <widget class="QMenu" name="menuDebug">
+    <property name="title">
+     <string>Debug</string>
+    </property>
+    <addaction name="actionShow_Undo_Stack"/>
+    <addaction name="actionShow_Redo_Stack"/>
    </widget>
    <addaction name="menuOpen"/>
    <addaction name="menuEdit"/>
    <addaction name="menuSearch"/>
    <addaction name="menuScripting"/>
    <addaction name="menuHelp"/>
+   <addaction name="menuDebug"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionSave">
@@ -322,6 +329,16 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+N</string>
+   </property>
+  </action>
+  <action name="actionShow_Undo_Stack">
+   <property name="text">
+    <string>Show Undo Stack</string>
+   </property>
+  </action>
+  <action name="actionShow_Redo_Stack">
+   <property name="text">
+    <string>Show Redo Stack</string>
    </property>
   </action>
  </widget>

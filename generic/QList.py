@@ -52,7 +52,7 @@ class QList(QAbstractListModel):
         return True
         
     def setData(self,index,value,role=Qt.EditRole):
-        self.undoer.recordEvent(self.setData,(self.data(index,role),role))
+        self.undoer.recordEvent(self.setData,(index,self.data(index,role),role))
         ix = index.row()
         if type(self.list[ix]) in self.supportedBuiltins:
             self.list[ix] = value
@@ -134,7 +134,8 @@ class QList(QAbstractListModel):
     def __getitem__(self,key):
         if type(key) is int:
             if key < 0: key = len(self) + key
-            return self.data(self.index(key,0,QModelIndex()),Qt.DisplayRole)
+            return self.list[key]
+            #self.data(self.index(key,0,QModelIndex()),Qt.DisplayRole)
         if type(key) is slice:
             start,end,step = self.sanitizeSlice(key)
             return QList([self.data[i] for i in range(start,end,step)])

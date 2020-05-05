@@ -45,12 +45,6 @@ class Ui_Dialog(object):
         self.horizontalLayout.addItem(spacerItem2)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.verticalLayout.setStretch(0, 200)
-        self.actionUndo = QtWidgets.QAction(Dialog)
-        self.actionUndo.setObjectName("actionUndo")
-        self.actionRedo = QtWidgets.QAction(Dialog)
-        self.actionRedo.setObjectName("actionRedo")
-        self.actionDelete = QtWidgets.QAction(Dialog)
-        self.actionDelete.setObjectName("actionDelete")
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
@@ -62,13 +56,6 @@ class Ui_Dialog(object):
         self.Remove.setText(_translate("Dialog", "Remove"))
         self.Accept.setText(_translate("Dialog", "Accept"))
         self.Cancel.setText(_translate("Dialog", "Cancel"))
-        self.actionUndo.setText(_translate("Dialog", "Undo"))
-        self.actionUndo.setShortcut(_translate("Dialog", "Ctrl+Z"))
-        self.actionRedo.setText(_translate("Dialog", "Redo"))
-        self.actionRedo.setShortcut(_translate("Dialog", "Ctrl+Y"))
-        self.actionDelete.setText(_translate("Dialog", "Delete"))
-        self.actionDelete.setShortcut(_translate("Dialog", "Del"))
-
 
 if __name__ == "__main__":
     import sys

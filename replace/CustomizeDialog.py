@@ -13,7 +13,9 @@ from replace.CustomizeModel import CustomizableResultsModel
 from replace.CustomizeDelegates import CustomizeFindDelegate,CustomizeReplaceDelegate
 
 #from PyQt5 import uic, QtWidgets, QtGui, QtCore
-from PyQt5.QtWidgets import QDialog, QApplication, QAbstractItemView,QMessageBox
+from PyQt5.QtWidgets import QDialog, QApplication, QAbstractItemView,QMessageBox,QShortcut
+from PyQt5.QtCore import Qt,QCoreApplication,QModelIndex
+from PyQt5.QtGui import QKeySequence 
 
 def catch_exceptions(t, val, tb):
     QMessageBox.critical(None,
@@ -61,9 +63,13 @@ class CustomizeReplacement(QDialog):
         self.ui.Before.setWordWrap(False)
         self.ui.After.setWordWrap(False)
 
-        self.ui.actionUndo.triggered.connect(self.undo)
-        self.ui.actionRedo.triggered.connect(self.redo)
-        self.ui.actionDelete.triggered.connect(self.remove)
+        self.actionUndo = QShortcut(QKeySequence("Ctrl+Z"),self)
+        self.actionRedo = QShortcut(QKeySequence("Ctrl+Y"),self)
+        self.actionDelete = QShortcut(QKeySequence("Del"),self)
+        
+        self.actionUndo.activated.connect(self.undo)
+        self.actionRedo.activated.connect(self.redo)
+        self.actionDelete.activated.connect(self.remove)
         
     def setDelegates(self):
         self.ui.Before.setItemDelegate(CustomizeFindDelegate())
@@ -86,7 +92,12 @@ class CustomizeReplacement(QDialog):
         self.model.reset()
         
     def remove(self):
-        self.model.removeMultindex(self.selection())
+        selection = self.selection()
+        nextIx = max((i.row() for i in selection))-len(selection)
+        self.model.removeMultindex(selection)
+        self.ui.Before.setCurrentIndex(
+                self.model.index(min(nextIx+1,len(self.model)-1),0,QModelIndex()),                
+                )
         
     def selection(self):
         return self.ui.Before.selectedIndexes()

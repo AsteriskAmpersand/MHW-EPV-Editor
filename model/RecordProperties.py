@@ -14,7 +14,7 @@ class RecordProperties(QWidget):
     undoableAction = QtCore.pyqtSignal(object)
     def __init__(self,parent=None):
         super().__init__(parent)
-        self.undoStack = []
+        self.undoStack = Stack()
         self.redoStack = Stack()
         self.setupUI()
         self.functors = []
@@ -23,10 +23,8 @@ class RecordProperties(QWidget):
         self.ui.setupUi(self)
     def connect(self,model):
         self.model = model
-        if model:
-            self.disconnectSignals()
-            self.fromModel()
-            self.connectSignals()
+        if model:            
+            self.fromModel()            
         else:
             self.disconnectSignals()
     def connectSignals(self):
@@ -41,11 +39,13 @@ class RecordProperties(QWidget):
                 pass
         self.functors=[]
     def fromModel(self,prop=None):
+        self.disconnectSignals()
         if prop is None:
             for prop in self.properties:
                 setattr(self,prop,getattr(self.model,prop))
         else:
             setattr(self,prop,self.model)
+        self.connectSignals()
     def toModel(self,prop=None):
         if prop is None:
             for props in self.properties:
@@ -57,12 +57,12 @@ class RecordProperties(QWidget):
             self.valueChanged(prop,newval)
         return changed
     def valueChanged(self,prop,newval):        
-        if newval == getattr(self.model,prop):
-            return
+        if newval == getattr(self.model,prop):return
         self.recordState(prop)
         self.undoableAction.emit(self)
         self.toModel()
     def recordState(self,prop,target = None,model=None):
+        #print("Event Recorded "+prop)
         if model is None:
             model = self.model
         propVal = getattr(model,prop)       
@@ -77,8 +77,12 @@ class RecordProperties(QWidget):
         model,val,name = peek
         self.recordState(name,inverse,model)
         self.consumeAction(source)        
-    def undo(self):self.do(self.undoStack[-1],self.redoStack.put,self.undoStack.pop)
-    def redo(self):self.do(self.redoStack.peek(),self.undoStack.append,self.redoStack.get)  
+    def undo(self):
+        #if not self.undoStack.empty():
+            self.do(self.undoStack.peek(),self.redoStack.put,self.undoStack.pop)
+    def redo(self):
+        #if not self.redoStack.empty():
+            self.do(self.redoStack.peek(),self.undoStack.append,self.redoStack.get)  
     def clearRedoStack(self):
         if not self.redoStack.empty():
             self.redoStack.clear()

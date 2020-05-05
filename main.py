@@ -13,6 +13,7 @@ from gui.Main import Ui_MainWindow
 from model.EPVTab import EPVTab
 from generic.Queue import CopyStack
 from replace.ReplaceDialog import ReplaceDialog
+from replace.FindDialog import FindDialog
 from splash.Splash import SplashScreen
 
 from PyQt5 import uic, QtWidgets, QtGui, QtCore
@@ -44,6 +45,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("Asterisk's Nebula Asterism")
         self.connectMenus()
         self.connectSignals()
+        #self.disableMenus()
         self.show()
         
     def connectMenus(self):
@@ -74,7 +76,11 @@ class MainWindow(QtWidgets.QMainWindow):
         #Find Menu
         self.ui.actionFind.triggered.connect(self.Find)
         self.ui.actionReplace.triggered.connect(self.Replace)
-        self.ui.actionBatch_Replace.triggered.connect(self.BatchReplace)
+        
+        #Debug Menu
+        self.ui.actionShow_Undo_Stack.triggered.connect(self.showUndoStack)
+        self.ui.actionShow_Redo_Stack.triggered.connect(self.showRedoStack)
+        self.ui.menuDebug.setVisible(False)
     
     def connectSignals(self):
         self.ui.fileTabs.tabCloseRequested.connect(self.closeTab)
@@ -88,6 +94,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.fileTabs.addTab(tab,filename.stem)
         self.ui.fileTabs.setCurrentWidget(tab)
         tab.tabNameChanged.connect(self.renameTab)
+        #self.enableMenus()
     def open(self):
         filename = QFileDialog.getOpenFileName(self,_translate("MainWindow","Open EPV3"),"",_translate("MainWindow","MHW EPV3 (*.epv3)"))
         if filename[0]:
@@ -103,6 +110,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.fileTabs.addTab(tab,"New EPV3")
         self.ui.fileTabs.setCurrentWidget(tab)
         tab.tabNameChanged.connect(self.renameTab)
+        self.enableMenus()
     def save(self):
         ix = self.ui.fileTabs.currentIndex()
         tab = self.ui.fileTabs.widget(ix)
@@ -145,8 +153,18 @@ class MainWindow(QtWidgets.QMainWindow):
 # =============================================================================
     
     def Find(self):
-        pass
+        if self.ui.fileTabs.currentIndex() == -1:
+            return
+        findDialog = FindDialog(self,self.currentWidget().currentIndex(),self)
+        metaIndex = findDialog.exec()
+        if metaIndex:
+            file,metaIndex = findDialog.results
+            self.ui.fileTabs.setCurrentWidget(file)
+            file.setCurrentIndex(metaIndex.index)
+            
     def Replace(self):
+        if self.ui.fileTabs.currentIndex() == -1:
+            return
         replacementDialog = ReplaceDialog(self,self)
         replace = replacementDialog.exec()
         if replace:
@@ -154,11 +172,22 @@ class MainWindow(QtWidgets.QMainWindow):
             for file in replacements:
                 file.replace(replacements[file])
     def BatchReplace(self):
-        pass
+        if not self.ui.fileTabs.currentIndex() == -1:
+            return
     def getCurrentFile(self):
         return self.currentWidget()
     def getFiles(self):
         return [self.ui.fileTabs.widget(i) for i in range(self.ui.fileTabs.count())]
+    
+# =============================================================================
+#  Debug Block
+# =============================================================================
+    
+    def showUndoStack(self):
+        print(self.currentWidget().undoStack)
+    def showRedoStack(self):
+        print(self.currentWidget().redoStack)
+        
 # =============================================================================
 # Housekeeping Blcok
 # =============================================================================
@@ -182,32 +211,71 @@ class MainWindow(QtWidgets.QMainWindow):
             tab.tabNameChanged.disconnect(self.renameTab)
             self.ui.fileTabs.removeTab(ix)
         event.accept()
-        
+
+# =============================================================================
+# Dark Theming
+# =============================================================================
+
+def setStyle(app):
+    from PyQt5.QtCore import Qt
+    app.setStyle("Fusion")
+    darkPalette = QPalette()
+    darkPalette.setColor(QPalette.Window,QColor(53,53,53));
+    darkPalette.setColor(QPalette.WindowText,Qt.white);
+    darkPalette.setColor(QPalette.Disabled,QPalette.WindowText,QColor(127,127,127));
+    darkPalette.setColor(QPalette.Base,QColor(42,42,42));
+    darkPalette.setColor(QPalette.AlternateBase,QColor(66,66,66));
+    darkPalette.setColor(QPalette.ToolTipBase,Qt.white);
+    darkPalette.setColor(QPalette.ToolTipText,Qt.white);
+    darkPalette.setColor(QPalette.Text,Qt.white);
+    darkPalette.setColor(QPalette.Disabled,QPalette.Text,QColor(127,127,127));
+    darkPalette.setColor(QPalette.Dark,QColor(35,35,35));
+    darkPalette.setColor(QPalette.Shadow,QColor(20,20,20));
+    darkPalette.setColor(QPalette.Button,QColor(53,53,53));
+    darkPalette.setColor(QPalette.ButtonText,Qt.white);
+    darkPalette.setColor(QPalette.Disabled,QPalette.ButtonText,QColor(127,127,127));
+    darkPalette.setColor(QPalette.BrightText,Qt.red);
+    darkPalette.setColor(QPalette.Link,QColor(42,130,218));
+    darkPalette.setColor(QPalette.Highlight,QColor(42,130,218));
+    darkPalette.setColor(QPalette.Disabled,QPalette.Highlight,QColor(80,80,80));
+    darkPalette.setColor(QPalette.HighlightedText,Qt.white);
+    darkPalette.setColor(QPalette.Disabled,QPalette.HighlightedText,QColor(127,127,127));
+    app.setPalette(darkPalette)
+
 if __name__ == '__main__':
     #from pathlib import Path
     app = QtWidgets.QApplication(sys.argv)
     args = app.arguments()[1:]
     splash = SplashScreen()
     response = splash.exec()
+    
     if not response:
         sys.exit(app.exec_())
+    
+    setStyle(app)
+    """
+    file = QFile("./dark.qss")
+    file.open(QFile.ReadOnly | QFile.Text)
+    stream = QTextStream(file)
+    app.setStyleSheet(stream.readAll())
+    """
     """
     app.setStyle("Fusion")
-    
+
     # Now use a palette to switch to dark colors:
     palette = QPalette()
-    palette.setColor(QPalette.Window, QColor(53, 53, 53))
-    palette.setColor(QPalette.WindowText, QtCore.Qt.white)
+    palette.setColor(QPalette.Window, QColor(42, 43, 46))
+    palette.setColor(QPalette.WindowText, QColor(224, 224, 224))
     palette.setColor(QPalette.Base, QColor(25, 25, 25))
-    palette.setColor(QPalette.AlternateBase, QColor(53, 53, 53))
-    palette.setColor(QPalette.ToolTipBase, QtCore.Qt.white)
-    palette.setColor(QPalette.ToolTipText, QtCore.Qt.white)
-    palette.setColor(QPalette.Text, QtCore.Qt.white)
+    palette.setColor(QPalette.AlternateBase, QColor(42, 43, 46))
+    palette.setColor(QPalette.ToolTipBase, QColor(224, 224, 224))
+    palette.setColor(QPalette.ToolTipText, QColor(224, 224, 224))
+    palette.setColor(QPalette.Text, QColor(224, 224, 224))
     palette.setColor(QPalette.Button, QColor(53, 53, 53))
-    palette.setColor(QPalette.ButtonText, QtCore.Qt.white)
+    palette.setColor(QPalette.ButtonText, QColor(224, 224, 224))
     palette.setColor(QPalette.BrightText, QtCore.Qt.red)
-    palette.setColor(QPalette.Link, QColor(42, 130, 218))
-    palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
+    palette.setColor(QPalette.Link, QColor(117, 115, 164))
+    palette.setColor(QPalette.Highlight, QColor(105, 125, 135))
     palette.setColor(QPalette.HighlightedText, QtCore.Qt.black)
     app.setPalette(palette)
     """

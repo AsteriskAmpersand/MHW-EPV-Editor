@@ -36,6 +36,8 @@ class ReplaceResultEntry():
         self.dataPath = dataIndex.dataPath()
         self.findValue =  dataIndex.findValue()
         self.replacedValue = replacementTarget
+    def metaIndex(self):
+        return self.indexRef
     def getRole(self,role):
         if role == FindRole:
             return self.displayFind(self.dataPath,self.findValue)
@@ -72,12 +74,6 @@ class ColorEntry(ReplaceResultEntry):
         return (dataPath,findColor)
     def displayReplace(self,replaceColor):
         return ("",replaceColor)
-    def getRole(self,role):
-        if role == Qt.BackgroundColorRole:
-            color = QColor("FFFFFF")
-            color.setAlpha(0)
-            return color
-        return super().getRole(role)
     
 class RGBAColorEntry(ColorEntry):
     pass
@@ -102,7 +98,7 @@ class CustomizableResultsModel(QList):
                 results[entry.fileRef].append((entry.indexRef,entry.replacedValue))
         return results
     def removeMultindex(self,multindex):
-        for index in multindex:
+        for index in sorted(multindex,key = lambda x: x.row(),reverse=True):
             if index.isValid():
                 self.removeRow(index.row(),QModelIndex())
     def entryType(self,index):

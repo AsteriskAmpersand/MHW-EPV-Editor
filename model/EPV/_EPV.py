@@ -29,17 +29,20 @@ sys.excepthook = catch_exceptions
     
 class EPV(QtCore.QAbstractItemModel):
     idEdited = QtCore.pyqtSignal(object)
+    epvEdited = QtCore.pyqtSignal(object,int)
+    pathEdited = QtCore.pyqtSignal(object,int)
     undoableAction = QtCore.pyqtSignal(object)
     
     from ._EPVUndo import (clearRedoStack,discardRecording,endRecording,recordState,redo,startRecording,undo)
     from ._EPVEditOperations import (_deleteGroup,_deleteRecord,_dropData,_insertGroup,_insertRecord,_replaceRecord,canDropMimeData,deleteGroup,deleteRecord,dropIntoQuery,dropMimeData,flags,hexRepresent,insertGroup,insertRecord,mimeData,mimeTypes,moveinto,newGroup,newRecord,removeRows,replaceRecord,supportedDropActions)
     from ._EPVCopyStack import (deepcopy,mixedStackQuery,pastePureStack,pasteStack)
     from ._EPVSearchOperations import (getStringReferences,getColorReferences)
+    from ._EPVReplace import (_colorReplace,_pathReplace,colorReplace,endReplace,pathReplace,startReplace)
     
     def __init__(self, parent = None, filepath = None):
         super().__init__(parent)
         self.undoStack = Stack()
-        self.redoQueue = Queue()
+        self.redoStack = Queue()
         self.movePending = False
         self.complexUndo = False
         self.__parent__ = parent
@@ -184,8 +187,8 @@ class EPV(QtCore.QAbstractItemModel):
     def undo(self):
         func,param = self.undoStack.pop()
         func(*param)
-        self.redoQueue.put(self.undoStack.pop())
+        self.redoStack.put(self.undoStack.pop())
     def redo(self):
-        func,param = self.redoQueue.pop()
+        func,param = self.redoStack.pop()
         func(*param)
     """

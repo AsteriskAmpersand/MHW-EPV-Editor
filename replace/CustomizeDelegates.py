@@ -110,7 +110,24 @@ class CustomizeFindDelegate(QStyledItemDelegate):
         h = fm.height()*1.5
         w = fm.width(text) + h
         return QSize(w, h)
+    
+    def drawColor(self,item,h,w,fm,painter,color):        
+        x0 = item.left()+w+5
+        y0 = item.top()+fm.height()*.15
+        x1 = item.right()-5
+        y1 = item.bottom()-fm.height()*.15
         
+        #debug(str(color))
+        brush = QBrush(QColor(*color))
+        #debug(0)
+        if not(x0>x1 or y0>y1):
+            rect = QRectF(x0,y0,x1-x0,y1-y0)
+            #debug(1)
+            painter.setBrush(brush)
+            #debug(2)
+            painter.drawRect(rect);
+            #debug(3)
+    
     def CFD_paint(self, painter, option, index,role):
         path,color =  index.data(role)
         painter.save()
@@ -134,22 +151,7 @@ class CustomizeFindDelegate(QStyledItemDelegate):
         w = max(180,fm.width(path) + h)
         #print(w)
         #print(h)
-        
-        x0 = item.left()+w+5
-        y0 = item.top()+fm.height()*.15
-        x1 = item.right()-5
-        y1 = item.bottom()-fm.height()*.15
-        
-        #debug(str(color))
-        brush = QBrush(QColor(*color))
-        #debug(0)
-        if not(x0>x1 or y0>y1):
-            rect = QRectF(x0,y0,x1-x0,y1-y0)
-            #debug(1)
-            painter.setBrush(brush)
-            #debug(2)
-            painter.drawRect(rect);
-            #debug(3)
+        self.drawColor(item,h,w,fm,painter,color)
         
         painter.restore()
         #super().paint(painter,option,index)
@@ -189,6 +191,23 @@ class CustomizeReplaceDelegate(CustomizeFindDelegate):
             return self.CFD_paint(painter,option,index,ReplaceRole)
         else:
             return super().paint(painter,option,index)
+
+    def drawColor(self,item,h,w,fm,painter,color):        
+        x0 = item.left()+5
+        y0 = item.top()+fm.height()*.15
+        x1 = w//2
+        y1 = item.bottom()-fm.height()*.15
+        
+        #debug(str(color))
+        brush = QBrush(QColor(*color))
+        #debug(0)
+        if not(x0>x1 or y0>y1):
+            rect = QRectF(x0,y0,x1-x0,y1-y0)
+            #debug(1)
+            painter.setBrush(brush)
+            #debug(2)
+            painter.drawRect(rect);
+            #debug(3)
 
     def createEditor(self, parent, option, index):
         t = self.getType(index)
