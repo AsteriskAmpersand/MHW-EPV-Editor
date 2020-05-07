@@ -7,14 +7,12 @@ Created on Mon May  4 14:55:55 2020
 
 
 import sys
-import os
 
 from gui.FindForm import Ui_Dialog
 from replace.CustomizeDelegates import CustomizeFindDelegate
 from replace.CustomizeModel import CustomizableResultsModel
 #from PyQt5 import uic, QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QDialog, QApplication, QMessageBox, QAbstractItemView
-from PyQt5.QtCore import Qt,QUrl
 from collections import OrderedDict
 #from PyQt5.QtCore import QFile, QTextStream
 

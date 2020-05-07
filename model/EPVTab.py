@@ -12,7 +12,7 @@ from pathlib import Path
 from generic.Queue import Stack
 from model.EPV import EPV,EPVGroup,EPVRecord
 from model.EPVCSlots import EPVCEntry
-from model.utils import layout_widgets, qlistiter
+from model.utils import qlistiter
 from structs.epv import EPVExtraneousProperties
 from gui.Forms import SelectForm
 from gui.FileTab import Ui_Form

@@ -7,18 +7,14 @@ Created on Fri May  1 03:32:47 2020
 
 
 import sys
-import os
 import re
-from pathlib import Path
 from math import sqrt
 
 from replace.ReplaceEnums import TEXT,COLOR
 from gui.ReplaceForm import Ui_Form
 
 from PyQt5.QtWidgets import QWidget, QColorDialog, QApplication
-from PyQt5 import QtCore
-from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtGui import QColor,QIcon
+from PyQt5.QtGui import QColor
 
 class ReplaceForm(QWidget):
     def __init__(self, *args):

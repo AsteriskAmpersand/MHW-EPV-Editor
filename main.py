@@ -12,17 +12,16 @@ from pathlib import Path
 from gui.Main import Ui_MainWindow
 from model.EPVTab import EPVTab
 from model.AboutScripting import AboutScripting
-from model.AboutHelp import AboutHelp
 from generic.Queue import CopyStack
 from scripting.scriptEngine import mse as MSE
 from replace.ReplaceDialog import ReplaceDialog
 from replace.FindDialog import FindDialog
 from splash.Splash import SplashScreen
 
-from PyQt5 import uic, QtWidgets, QtGui, QtCore
+from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtGui import QPalette, QColor, QDesktopServices
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
-from PyQt5.QtCore import QFile, QTextStream, QUrl
+from PyQt5.QtCore import QUrl
 _translate = QtCore.QCoreApplication.translate
 
 DEBUG = False
@@ -364,5 +363,5 @@ if __name__ == '__main__':
     window = MainWindow(args)
     #tab = EPVTab(self,r"E:\MHW\chunkG0\pl\f_equip\pl124_0000\body\epv\f_body124.epv3")
     #self.ui.fileTabs.addTab(tab,"Test") 
-    window.openFile(Path(r"E:\MHW\chunkG0\wp\rod\epv\hm_wp10_01.epv3"))
+    if DEBUG: window.openFile(Path(r"E:\MHW\chunkG0\wp\rod\epv\hm_wp10_01.epv3"))
     sys.exit(app.exec_())

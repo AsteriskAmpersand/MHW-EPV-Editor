@@ -8,7 +8,7 @@ from PyQt5.QtCore import Qt, QMimeData, QModelIndex
 from PyQt5.QtWidgets import QMessageBox
 from ._EPVGroup import EPVGroup
 from ._EPVRecord import EPVRecord
-from ._EPVMimeTypes import EPVMETADATA,EPVGROUP,EPVRECORD,BINARY,HEXTEXT
+from ._EPVMimeTypes import EPVMETADATA,EPVGROUP,EPVRECORD,BINARY
 
 
 def hexRepresent(binaryData):

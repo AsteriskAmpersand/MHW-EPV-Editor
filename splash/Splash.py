@@ -11,11 +11,7 @@ from PyQt5.QtCore import Qt,QUrl
 
 class SplashScreen(QDialog):
     def __init__(self, *args):
-        super().__init__(*args)     
-        if getattr(sys, 'frozen', False):
-            application_path = sys._MEIPASS
-        elif __file__:
-            application_path = os.path.dirname(__file__)
+        super().__init__(*args)
 #        self.setWindowIcon(QtGui.QIcon(application_path+r"\resources\DodoSama.png"))
         self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
         

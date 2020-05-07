@@ -11,10 +11,7 @@ from generic.Queue import Queue, Stack
 
 from ._EPVGroup import EPVGroup
 from ._EPVRecord import EPVRecord
-from . import _EPVEditOperations as EPVE
-from . import _EPVUndo as EPVU
 
-from PyQt5.QtCore import Qt
 from PyQt5 import QtCore,QtWidgets
 import sys
 
