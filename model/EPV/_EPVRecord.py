@@ -79,5 +79,12 @@ class EPVRecord():
     def row(self):
         return self.__parent__.find(self)
     
+    def __iter__(self):
+        return iter(self.epvc)
+    def __getitem__(self,index):
+        return self.epvc[index]
+    def __setitem__(self,index,value):
+        self.epvc[index] = value
+    
     def __deepcopy__(self,memo = None):
         return self.fromExtendedBinary(self.binaryExtendedSerialize())

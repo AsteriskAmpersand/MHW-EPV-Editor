@@ -6,17 +6,21 @@ Created on Wed Apr 22 16:45:22 2020
 """
 
 from itertools import chain
+from functools import partial
 from pathlib import Path
-from generic.Queue import Queue,Stack
+
+from generic.Queue import Stack
 from model.EPV import EPV,EPVGroup,EPVRecord
 from model.EPVCSlots import EPVCEntry
 from model.utils import layout_widgets, qlistiter
 from structs.epv import EPVExtraneousProperties
 from gui.Forms import SelectForm
 from gui.FileTab import Ui_Form
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QFileDialog, QApplication
-_translate = QtCore.QCoreApplication.translate
+
+from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QFileDialog, QApplication,QAction,QMenu
+from PyQt5.QtCore import QModelIndex, pyqtSignal, Qt, QCoreApplication
+_translate = QCoreApplication.translate
 
 def functionChain(functionList):
     for function in functionList:
@@ -33,10 +37,34 @@ def catch_exceptions(t, val, tb):
 old_hook = sys.excepthook
 sys.excepthook = catch_exceptions
 
+def defaultIfNone(function):
+    def composite(self,*args):
+        ix = None
+        if len(args)>0:
+            ix = args[0]
+        if ix is None: 
+            ix = self.currentIndex()
+        #if not (ix and ix.isValid()):
+        #    return False
+        #print(function.__name__)
+        #print(ix.row(),ix.internalPointer())
+        return function(self,ix)
+    return composite
+
+def defaultIfClipboard(function):
+    def composite(self,clipboard,ix = None):
+        if ix is None: 
+            ix = self.currentIndex()
+        #if not (hasattr(ix,"isValid") and ix.isValid()):
+        #    return False
+        return function(self,clipboard,ix)
+    return composite
+
 class EPVTab(QtWidgets.QWidget):
-    tabNameChanged = QtCore.pyqtSignal(object,object)
+    tabNameChanged = pyqtSignal(object,object)
     def __init__(self, parent = None, epvpath = None):
         super().__init__(parent)
+        #self.__parent__ = parent
         self.undoStack = Stack()
         self.redoStack = Stack()
         self.__changed__ = False
@@ -63,10 +91,42 @@ class EPVTab(QtWidgets.QWidget):
             self.__changed__=value
             self.tabNameChanged.emit(self,"*"+(Path(self.path).stem if self.path else "New File"))
     
+    def disableSelection(self):
+        self.ui.recordBrowser.setCurrentIndex(QModelIndex())
+    
     def connect(self):
         self.ui.recordBrowser.setModel(self.EPVModel)
-        self.connectSignals()   
-
+        self.connectSignals()
+        self.connectMenu()
+        
+    def connectMenu(self):
+        view = self.ui.recordBrowser
+        view.setContextMenuPolicy(Qt.CustomContextMenu)
+        view.customContextMenuRequested.connect(self.customContextMenuRequested)
+         
+    def customContextMenuRequested(self, gp):
+        view = self.ui.recordBrowser
+        menu = QMenu(self)
+        ix = view.indexAt(gp)
+        record = [self.newRecord] if type(ix.internalPointer()) is EPVGroup else []
+        recordName = ["New Record"] if type(ix.internalPointer()) is EPVGroup else []
+        for actionName,method in zip(["New Group"]+recordName+
+                                     ["Copy","Paste","Copy Properties",
+                                      "Paste Properties","Delete","Duplicate"],
+                         [self.newGroup]+record+[self.copy,self.paste,self.copyProperties,self.pasteProperties,
+                          self.delete,self.duplicate]):
+            action = QAction(actionName,view)
+            action.triggered.connect(partial(method,(ix)))
+            menu.addAction(action)
+        clipboard = self.parentWidget().parentWidget().parentWidget().parentWidget().copyStack
+        for actionName,method in zip(["Push to Copy Stack","Paste Copy Stack"],
+                                     [self.pushStack,self.pasteStack]):
+            action = QAction(actionName,view)
+            action.triggered.connect(partial(method,(clipboard,ix)))
+            menu.addAction(action)
+        action = menu.exec_(view.viewport().mapToGlobal(gp))
+        #print(ix.row(),ix.column(),ix.internalPointer())
+        
     def connectSignals(self):
         self.ui.RecordIDs.undoableAction.connect(self.actionPushed)
         self.ui.efxPathsGroup.undoableAction.connect(self.actionPushed)
@@ -172,6 +232,13 @@ class EPVTab(QtWidgets.QWidget):
     def enableGroup(self): self.toggleGroup(True)
     
 # =============================================================================
+# Main - Scripting Functionality
+# =============================================================================
+    
+    def invalidateCaches(self):
+        self.EPVModel.invalidateCaches()
+    
+# =============================================================================
 # Main - Search Functionality
 # =============================================================================
 
@@ -209,40 +276,67 @@ class EPVTab(QtWidgets.QWidget):
         while(not self.redoStack.empty()):
             responsible = self.redoStack.get()
             responsible.clearRedoStack()
-            
-    def delete(self):self.EPVModel.removeRows(self.currentIndex().row(),1,self.currentIndex().parent())
-    def duplicate(self):self.currentEntry().duplicate()
-    def copy(self):QApplication.clipboard().setMimeData(self.EPVModel.mimeData([self.currentIndex()]))
-    def paste(self):
+    @defaultIfNone
+    def delete(self,ix):
+        r = ix.row()
+        p = ix.parent()
+        return self.EPVModel.removeRows(r,1,p)
+    @defaultIfNone
+    def duplicate(self,ix):
+        return self.getEntry(ix)
+    @defaultIfNone
+    def copy(self,ix):
+        if not ix.isValid():
+            return False
+        QApplication.clipboard().setMimeData(self.EPVModel.mimeData([ix]))
+    @defaultIfNone
+    def paste(self,ix):
         self.EPVModel.dropMimeData( QApplication.clipboard().mimeData(),
-                                    QtCore.Qt.CopyAction,
-                                    self.currentIndex().row(),
-                                    0,
-                                    self.currentIndex().parent())
-    def copyProperties(self):return self.currentEntry()
-    def pasteProperties(self,clipboard):self.currentEntry().pasteProperties(clipboard)
-    def pushStack(self,mainCopyStack):mainCopyStack.put(self.currentEntry())
-    def pasteStack(self,mainCopyStack):self.EPVModel.pasteStack(self.currentIndex(),mainCopyStack)
-    def newGroup(self):
-        index = self.currentIndex()
+                                    Qt.CopyAction,
+                                    ix.row(),
+                                    ix.column(),
+                                    ix.parent())
+    @defaultIfNone
+    def copyProperties(self,ix):
+        if not ix.isValid():
+            return False
+        return self.getEntry(ix)
+    @defaultIfClipboard
+    def pasteProperties(self,clipboard,ix):
+        self.getEntry(ix).pasteProperties(clipboard)
+    @defaultIfClipboard
+    def pushStack(self,mainCopyStack,ix):
+        if not ix.isValid():
+            return False
+        mainCopyStack.put(self.getEntry(ix))
+    @defaultIfClipboard
+    def pasteStack(self,mainCopyStack,ix):
+        self.EPVModel.pasteStack(ix,mainCopyStack)
+    @defaultIfNone
+    def newGroup(self, index):
         if index.isValid():
             self.EPVModel.newGroup(index.row()+1)
             self.selectNextGroup()
         else:
             self.EPVModel.newGroup()            
-        
-    def newRecord(self):self.EPVModel.newRecord(self.currentIndex())
+    @defaultIfNone
+    def newRecord(self,ix):
+        if not ix.isValid():
+            return False
+        self.EPVModel.newRecord(self.getEntry(ix))
 # =============================================================================
 # Main - File Functionality
 # =============================================================================
+    def getEntry(self,ix):
+        return self.EPVModel.access(ix)
     def currentEntry(self):
-        return self.EPVModel.access(self.currentIndex())
+        return self.getEntry(self.currentIndex())
     def currentIndex(self):
         selection = self.ui.recordBrowser.selectedIndexes()
         if len(selection)==1:
             return selection[0]
         else:
-            return QtCore.QModelIndex()
+            return QModelIndex()
     def setCurrentIndex(self,index):
         self.ui.recordBrowser.setCurrentIndex(index)
     def selectNextGroup(self):

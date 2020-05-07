@@ -71,7 +71,8 @@
     <property name="title">
      <string>Scripting</string>
     </property>
-    <addaction name="actionFile_Scripting"/>
+    <addaction name="actionOpen_Interactive_Console"/>
+    <addaction name="actionLoad_Script"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -147,7 +148,7 @@
     <string>Ctrl+Alt+Shift+S</string>
    </property>
   </action>
-  <action name="actionFile_Scripting">
+  <action name="actionLoad_Script">
    <property name="text">
     <string>Load Script</string>
    </property>
@@ -339,6 +340,16 @@
   <action name="actionShow_Redo_Stack">
    <property name="text">
     <string>Show Redo Stack</string>
+   </property>
+  </action>
+  <action name="actionLoad_Unsafe_Script">
+   <property name="text">
+    <string>Load Unsafe Script</string>
+   </property>
+  </action>
+  <action name="actionOpen_Interactive_Console">
+   <property name="text">
+    <string>Open Interactive Console</string>
    </property>
   </action>
  </widget>

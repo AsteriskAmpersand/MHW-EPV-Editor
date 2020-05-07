@@ -40,3 +40,7 @@ def redo(self):
     
 def clearRedoStack(self):
     self.redoStack = Stack()
+    
+def invalidateCaches(self):
+    self.redoStack.clear()
+    self.undoStack.clear()

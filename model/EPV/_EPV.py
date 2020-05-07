@@ -33,7 +33,7 @@ class EPV(QtCore.QAbstractItemModel):
     pathEdited = QtCore.pyqtSignal(object,int)
     undoableAction = QtCore.pyqtSignal(object)
     
-    from ._EPVUndo import (clearRedoStack,discardRecording,endRecording,recordState,redo,startRecording,undo)
+    from ._EPVUndo import (clearRedoStack,discardRecording,endRecording,recordState,redo,startRecording,undo,invalidateCaches)
     from ._EPVEditOperations import (_deleteGroup,_deleteRecord,_dropData,_insertGroup,_insertRecord,_replaceRecord,canDropMimeData,deleteGroup,deleteRecord,dropIntoQuery,dropMimeData,flags,hexRepresent,insertGroup,insertRecord,mimeData,mimeTypes,moveinto,newGroup,newRecord,removeRows,replaceRecord,supportedDropActions)
     from ._EPVCopyStack import (deepcopy,mixedStackQuery,pastePureStack,pasteStack)
     from ._EPVSearchOperations import (getStringReferences,getColorReferences)

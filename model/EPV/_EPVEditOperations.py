@@ -10,7 +10,6 @@ from ._EPVGroup import EPVGroup
 from ._EPVRecord import EPVRecord
 from ._EPVMimeTypes import EPVMETADATA,EPVGROUP,EPVRECORD,BINARY,HEXTEXT
 
-#TODO - For some reason moving to the top of the list causes an issue
 
 def hexRepresent(binaryData):
     return  ' '.join(list(map(lambda x: "%02X"%x,binaryData)))
@@ -120,6 +119,11 @@ def _insertGroup(self,group,groupIndex):
     self.endInsertRows()
     return True
 
+def _replaceGroup(self,group,groupIndex):
+    self._removeGroup(groupIndex)
+    self._insertGroup(group,groupIndex)
+    return True
+
 def insertGroup(self,group,groupIndex = None):
     if groupIndex == None:
         groupIndex = len(self)
@@ -187,12 +191,19 @@ def moveinto(self,index,data):
 #-1 -1 || x:0 epv -> Moving ontop of group x
 #-1 -1 || x:0 epvgroup y -> Moving ontop of record x on epvgroup y
 
+#TODO - Missing one case the one where it drops into the open space
     
 def _dropData(self,target,data):
     row, col, parent = target
     typing = type(data)
     #print("%d %d || %d %d %s"%(row,col,parent.row(),parent.column(),parent.internalPointer()))
     if (row,col) == (-1,-1):
+        if not parent.isValid():
+            if typing is EPVRecord:
+                return False
+            elif typing is EPVGroup:
+                self.insertGroup(data,len(self))
+                return True
         if typing is EPVRecord and type(self.access(parent)) is EPVGroup:
             self.insertRecord(self.access(parent),data)
             return True
@@ -214,6 +225,7 @@ def _dropData(self,target,data):
     return False
 
 def dropMimeData(self, mimeData, dropAction, row, col, parent):
+    print("%d - %d | %d %d %s"%(row,col,parent.row(),parent.column(),parent.internalPointer()))
     if dropAction == Qt.IgnoreAction:
         return True
     if dropAction == Qt.MoveAction:
@@ -239,9 +251,9 @@ def dropMimeData(self, mimeData, dropAction, row, col, parent):
             result = self._dropData((row, col, parent),data)
             if not result: 
                 self.discardRecording()
+                return False
             self.endRecording()
                 
-    #TODO implement CopyAction Qt.CopyAction (it's the same you just deserialize the data instead of using a direct reference)
     #If row and col -1 ask user if they want to replace the data there or just throw it above or below
     return False 
 #bool QAbstractItemModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent)

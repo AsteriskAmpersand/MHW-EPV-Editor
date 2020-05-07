@@ -56,11 +56,11 @@ record = Struct(
     "positionJitter" / float32[3] *"float[3]",#[0,0,0] normally
     "rotation" / float32[3] *"float[3]",#[0,0,0] normally
     "rotationJitter" / float32[3] *"float[3]",#[0,0,0] normally
-    "paramU3"/ int32[2] *"int[2]",# normally 0,0 or 5,4 or 4,4
+    "paramW3"/ int32[2] *"int[2]",# normally 0,0 or 5,4 or 4,4
     "boneID" / int32 *"int",#tends to be -1
-    "paramU4" / int32[3] *"int[3]",#confirmeed cursed shit, tends to be [0,0,-1]
+    "paramW4" / int32[3] *"int[3]",#confirmeed cursed shit, tends to be [0,0,-1]
     "epvColor" / epvc[8] *"epvc[8]",
-    "paramU5" / float32[2] *"float[2]",#tends to be [1,0]
+    "paramW5" / float32[2] *"float[2]",#tends to be [1,0]
     "parameterBlock2" / parameterBlock2 *"parameterBlock2",
     "paramV" / int32[4] *"int[4]",#[0, 0, 0, 0] normally
 )

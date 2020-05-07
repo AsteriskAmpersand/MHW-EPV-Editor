@@ -11,14 +11,17 @@ from pathlib import Path
 
 from gui.Main import Ui_MainWindow
 from model.EPVTab import EPVTab
+from model.AboutScripting import AboutScripting
+from model.AboutHelp import AboutHelp
 from generic.Queue import CopyStack
+from scripting.scriptEngine import mse as MSE
 from replace.ReplaceDialog import ReplaceDialog
 from replace.FindDialog import FindDialog
 from splash.Splash import SplashScreen
 
 from PyQt5 import uic, QtWidgets, QtGui, QtCore
 from PyQt5.QtGui import QPalette, QColor
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from PyQt5.QtCore import QFile, QTextStream
 _translate = QtCore.QCoreApplication.translate
 
@@ -77,10 +80,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.actionFind.triggered.connect(self.Find)
         self.ui.actionReplace.triggered.connect(self.Replace)
         
+        #Script Menu
+        self.ui.actionOpen_Interactive_Console.triggered.connect(self.loadInteractive)
+        self.ui.actionLoad_Script.triggered.connect(self.loadScript)
+        
+        #Help Menu
+        self.ui.actionScripting.triggered.connect(self.scriptingHelp)
+        self.ui.actionAbout.triggered.connect(self.aboutHelp)
+        
         #Debug Menu
         self.ui.actionShow_Undo_Stack.triggered.connect(self.showUndoStack)
         self.ui.actionShow_Redo_Stack.triggered.connect(self.showRedoStack)
         self.ui.menuDebug.setVisible(False)
+        self.ui.menuDebug.menuAction().setVisible(False)
     
     def connectSignals(self):
         self.ui.fileTabs.tabCloseRequested.connect(self.closeTab)
@@ -93,7 +105,7 @@ class MainWindow(QtWidgets.QMainWindow):
         tab = EPVTab(self,filename)
         self.ui.fileTabs.addTab(tab,filename.stem)
         self.ui.fileTabs.setCurrentWidget(tab)
-        tab.tabNameChanged.connect(self.renameTab)
+        tab.tabNameChanged.connect(self.renameTab)        
         #self.enableMenus()
     def open(self):
         filename = QFileDialog.getOpenFileName(self,_translate("MainWindow","Open EPV3"),"",_translate("MainWindow","MHW EPV3 (*.epv3)"))
@@ -110,7 +122,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.fileTabs.addTab(tab,"New EPV3")
         self.ui.fileTabs.setCurrentWidget(tab)
         tab.tabNameChanged.connect(self.renameTab)
-        self.enableMenus()
+        #self.enableMenus()
     def save(self):
         ix = self.ui.fileTabs.currentIndex()
         tab = self.ui.fileTabs.widget(ix)
@@ -178,6 +190,63 @@ class MainWindow(QtWidgets.QMainWindow):
         return self.currentWidget()
     def getFiles(self):
         return [self.ui.fileTabs.widget(i) for i in range(self.ui.fileTabs.count())]
+    
+# =============================================================================
+# Scripting Block
+# =============================================================================
+    
+    def loadVarDict(self):
+        return {"files":MSE.files,"current":MSE.current,"open":MSE.openFile}
+    
+    def loadInteractive(self):
+        __qbox__ = QMessageBox()
+        __qbox__.setText("Warning about loading Scripting:")
+        __qbox__.setInformativeText("Undo and Redo functionality in all tabs will be be invalidated.\n Open the scripting console despite this?")
+        __qbox__.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        __qbox__.setDefaultButton(QMessageBox.Ok)
+        __response__ = __qbox__.exec()
+        if __response__ == QMessageBox.Ok:
+            self.invalidateCaches()
+            MSE.start(self)
+            MSE.interactiveMode(self.loadVarDict())
+            MSE.stop()
+        return
+
+    def loadScript(self):
+        __filepath__ = QFileDialog.getOpenFileName(
+                self,_translate("MainWindow","Load Script"),
+                "",
+                _translate("MainWindow","Python Script File (*.py)"))[0]
+        if not __filepath__:
+            return
+        __qbox__ = QMessageBox()
+        __qbox__.setText("Warning about loading Scripts:")
+        __qbox__.setInformativeText("Undo and Redo functionality in all tabs will be be invalidated.\n Load script despite this?")
+        __qbox__.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        __qbox__.setDefaultButton(QMessageBox.Ok)
+        __response__ = __qbox__.exec()
+        if __response__ == QMessageBox.Ok:
+            self.invalidateCaches()
+            MSE.start(self)
+            exec(open(__filepath__,"r").read(),{},self.loadVarDict())
+            MSE.stop()
+        return
+
+    def invalidateCaches(self):
+        for tab in [self.ui.fileTabs.widget(i) for i in range(self.ui.fileTabs.count())]:
+            tab.invalidateCaches()
+            tab.disableSelection()
+            tab.changed = True
+
+# =============================================================================
+# Help Block
+# =============================================================================
+        
+    def scriptingHelp(self):
+        AboutScripting(self)
+    
+    def aboutHelp(self):
+        AboutHelp(self)
     
 # =============================================================================
 #  Debug Block

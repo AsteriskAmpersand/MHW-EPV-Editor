@@ -166,3 +166,13 @@ class ExplicitUndoRedoController(UndoRedoController):
         if self.disabled:
             return
         super().clearRedoStack(self)
+        
+class DummyRedoController(UndoRedoController):
+    def __init__(self,*args,**kwargs):pass
+    def empty(self,*args,**kwargs):pass
+    def recordEvent(self,*args,**kwargs):pass
+    def startRecording(self,*args,**kwargs):pass 
+    def stopRecording(self,*args,**kwargs):pass        
+    def discardCurrent(self,*args,**kwargs):pass
+    def discardCompletely(self,*args,**kwargs):pass
+    def clearRedoStack(self,*args,**kwargs):pass

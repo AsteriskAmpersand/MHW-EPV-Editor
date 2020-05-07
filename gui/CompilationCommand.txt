@@ -11,3 +11,6 @@
 "D:\Program Files\WinPython-64bit-3.5.3.0Qt5\python-3.5.3.amd64\Scripts\pyuic5.bat" -x ReplaceForm.ui -o ReplaceForm.py
 "D:\Program Files\WinPython-64bit-3.5.3.0Qt5\python-3.5.3.amd64\Scripts\pyuic5.bat" -x CustomizeReplacement.ui -o CustomizeReplacement.py
 "D:\Program Files\WinPython-64bit-3.5.3.0Qt5\python-3.5.3.amd64\Scripts\pyuic5.bat" -x FindForm.ui -o FindForm.py
+
+"D:\Program Files\WinPython-64bit-3.5.3.0Qt5\python-3.5.3.amd64\Scripts\pyuic5.bat" -x InteractiveConsole.ui -o InteractiveConsole.py
+"D:\Program Files\WinPython-64bit-3.5.3.0Qt5\python-3.5.3.amd64\Scripts\pyuic5.bat" -x HelpScripting.ui -o HelpScripting.py
