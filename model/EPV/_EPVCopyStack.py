@@ -44,18 +44,24 @@ def pastePureStack(self,index,copyStack):
     #print(typing)
     #print(typing is EPVGroup)
     #It's failing for groups
+    print(target)
     if typing is EPVGroup:
         op = self.insertGroup
         if type(target) is EPVGroup:
             args = lambda entry: (deepcopy(entry),target.row()+1)
         elif type(target) is EPVRecord:
             args = lambda entry: (deepcopy(entry),target.__parent__.row()+1)
+        else:
+            args = lambda entry: (deepcopy(entry),len(self))
     elif typing is EPVRecord:
         op = self.insertRecord
         if type(target) is EPVGroup:
             args = lambda entry: (target,deepcopy(entry))
         elif type(target) is EPVRecord:
             args = lambda entry: (target.__parent__,deepcopy(entry),target.row()+1)   
+        else:
+            args = lambda entry: (self[-1],
+                                  deepcopy(entry))
             #print(target.__parent__)
     for entry in copyStack.consume():
         op(*args(entry))

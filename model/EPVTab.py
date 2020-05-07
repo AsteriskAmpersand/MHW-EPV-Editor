@@ -48,16 +48,24 @@ def defaultIfNone(function):
         #    return False
         #print(function.__name__)
         #print(ix.row(),ix.internalPointer())
-        return function(self,ix)
+        result = function(self,ix)
+        self.EPVModel.dataChanged.emit(ix,ix) #Might degrade performance compared to responsiveness
+        return result
     return composite
 
 def defaultIfClipboard(function):
     def composite(self,clipboard,ix = None):
+        #print(function.__name__)
+        #print(type(self))
+        #print(type(clipboard))
+        #print(type(ix))
         if ix is None: 
             ix = self.currentIndex()
         #if not (hasattr(ix,"isValid") and ix.isValid()):
         #    return False
-        return function(self,clipboard,ix)
+        result = function(self,clipboard,ix)
+        self.EPVModel.dataChanged.emit(ix,ix) #Might degrade performance compared to responsiveness
+        return result
     return composite
 
 class EPVTab(QtWidgets.QWidget):
@@ -108,21 +116,26 @@ class EPVTab(QtWidgets.QWidget):
         view = self.ui.recordBrowser
         menu = QMenu(self)
         ix = view.indexAt(gp)
-        record = [self.newRecord] if type(ix.internalPointer()) is EPVGroup else []
-        recordName = ["New Record"] if type(ix.internalPointer()) is EPVGroup else []
+        record = [self.newRecord] if ix.row()!=-1 else []
+        recordName = ["New Record"] if ix.row()!=-1 else []
         for actionName,method in zip(["New Group"]+recordName+
-                                     ["Copy","Paste","Copy Properties",
-                                      "Paste Properties","Delete","Duplicate"],
-                         [self.newGroup]+record+[self.copy,self.paste,self.copyProperties,self.pasteProperties,
-                          self.delete,self.duplicate]):
+                                     ["Copy","Paste","Delete","Duplicate"],
+                         [self.newGroup]+record+
+                         [self.copy,self.paste,self.delete,self.duplicate]):
             action = QAction(actionName,view)
             action.triggered.connect(partial(method,(ix)))
             menu.addAction(action)
         clipboard = self.parentWidget().parentWidget().parentWidget().parentWidget().copyStack
+        propclipboard = self.parentWidget().parentWidget().parentWidget().parentWidget().propertyClipboard
         for actionName,method in zip(["Push to Copy Stack","Paste Copy Stack"],
                                      [self.pushStack,self.pasteStack]):
             action = QAction(actionName,view)
-            action.triggered.connect(partial(method,(clipboard,ix)))
+            action.triggered.connect(partial(method,clipboard,ix))
+            menu.addAction(action)
+        for actionName,method in zip(["Copy Properties","Paste Properties"],
+                                     [self.copyProperties,self.pasteProperties]):
+            action = QAction(actionName,view)
+            action.triggered.connect(partial(method,propclipboard,ix))
             menu.addAction(action)
         action = menu.exec_(view.viewport().mapToGlobal(gp))
         #print(ix.row(),ix.column(),ix.internalPointer())
@@ -280,10 +293,12 @@ class EPVTab(QtWidgets.QWidget):
     def delete(self,ix):
         r = ix.row()
         p = ix.parent()
+        if r == -1: return False
         return self.EPVModel.removeRows(r,1,p)
     @defaultIfNone
     def duplicate(self,ix):
-        return self.getEntry(ix)
+        if ix.row() == -1: return False
+        return self.getEntry(ix).duplicate()
     @defaultIfNone
     def copy(self,ix):
         if not ix.isValid():
@@ -296,14 +311,14 @@ class EPVTab(QtWidgets.QWidget):
                                     ix.row(),
                                     ix.column(),
                                     ix.parent())
-    @defaultIfNone
-    def copyProperties(self,ix):
+    @defaultIfClipboard
+    def copyProperties(self,clipboard,ix):
         if not ix.isValid():
             return False
-        return self.getEntry(ix)
+        clipboard.set(self.getEntry(ix))
     @defaultIfClipboard
     def pasteProperties(self,clipboard,ix):
-        self.getEntry(ix).pasteProperties(clipboard)
+        self.getEntry(ix).pasteProperties(clipboard.get())
     @defaultIfClipboard
     def pushStack(self,mainCopyStack,ix):
         if not ix.isValid():
@@ -321,9 +336,7 @@ class EPVTab(QtWidgets.QWidget):
             self.EPVModel.newGroup()            
     @defaultIfNone
     def newRecord(self,ix):
-        if not ix.isValid():
-            return False
-        self.EPVModel.newRecord(self.getEntry(ix))
+        self.EPVModel.newRecord(ix)
 # =============================================================================
 # Main - File Functionality
 # =============================================================================

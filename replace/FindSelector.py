@@ -13,6 +13,7 @@ class FindForm(ReplaceForm):
     def __init__(self, *args):
         QWidget.__init__(self,*args)
         self.color1 = "#FFFFFFFFFF"
+        self.color2 = "#FFFFFFFFFF"
         self.ui = Ui_Form()
         self.ui.setupUi(self)
         

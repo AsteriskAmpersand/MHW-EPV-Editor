@@ -20,14 +20,26 @@ from replace.FindDialog import FindDialog
 from splash.Splash import SplashScreen
 
 from PyQt5 import uic, QtWidgets, QtGui, QtCore
-from PyQt5.QtGui import QPalette, QColor
+from PyQt5.QtGui import QPalette, QColor, QDesktopServices
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
-from PyQt5.QtCore import QFile, QTextStream
+from PyQt5.QtCore import QFile, QTextStream, QUrl
 _translate = QtCore.QCoreApplication.translate
+
+DEBUG = False
 
 def functionChain(functionList):
     for function in functionList:
         function()
+
+class clipboard():
+    def __init__(self):
+        self.data = None
+    def __bool__(self):
+        return self.data
+    def get(self):
+        return self.data
+    def set(self,value):
+        self.data = value
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, arguments):
@@ -39,7 +51,7 @@ class MainWindow(QtWidgets.QMainWindow):
             application_path = os.path.dirname(__file__)
         self.setWindowIcon(QtGui.QIcon(application_path+r"\resources\DodoSama.png"))
         self.copyStack = CopyStack()
-        self.propertyClipboard = None
+        self.propertyClipboard = clipboard()
         
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -91,8 +103,9 @@ class MainWindow(QtWidgets.QMainWindow):
         #Debug Menu
         self.ui.actionShow_Undo_Stack.triggered.connect(self.showUndoStack)
         self.ui.actionShow_Redo_Stack.triggered.connect(self.showRedoStack)
-        self.ui.menuDebug.setVisible(False)
-        self.ui.menuDebug.menuAction().setVisible(False)
+        if not DEBUG:
+            self.ui.menuDebug.setVisible(False)
+            self.ui.menuDebug.menuAction().setVisible(False)
     
     def connectSignals(self):
         self.ui.fileTabs.tabCloseRequested.connect(self.closeTab)
@@ -149,7 +162,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def duplicate(self):self.currentWidget().duplicate()
     def copy(self):self.currentWidget().copy()
     def paste(self):self.currentWidget().paste()
-    def copyProperties(self):self.propertyClipboard = self.currentWidget().copyProperties()
+    def copyProperties(self):self.currentWidget().copyProperties(self.propertyClipboard)
     def pasteProperties(self):
         if self.propertyClipboard: 
             self.currentWidget().pasteProperties(self.propertyClipboard)
@@ -169,7 +182,7 @@ class MainWindow(QtWidgets.QMainWindow):
             return
         findDialog = FindDialog(self,self.currentWidget().currentIndex(),self)
         metaIndex = findDialog.exec()
-        if metaIndex:
+        if metaIndex and findDialog.results:
             file,metaIndex = findDialog.results
             self.ui.fileTabs.setCurrentWidget(file)
             file.setCurrentIndex(metaIndex.index)
@@ -246,7 +259,7 @@ class MainWindow(QtWidgets.QMainWindow):
         AboutScripting(self)
     
     def aboutHelp(self):
-        AboutHelp(self)
+        QDesktopServices.openUrl(QUrl(r"https://github.com/Ezekial711/MonsterHunterWorldModding/wiki/Editing-EPV-Files"))
     
 # =============================================================================
 #  Debug Block

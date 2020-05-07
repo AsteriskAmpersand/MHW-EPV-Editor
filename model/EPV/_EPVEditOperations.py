@@ -137,7 +137,7 @@ def newGroup(self,groupIndex = None):
     
 def newRecord(self,recordIndex):
     if not recordIndex.isValid():
-        return False
+        recordIndex = self.index(len(self)-1,0,QModelIndex())
     if type(self.access(recordIndex)) is EPVRecord:
         recordIndex = recordIndex.parent()
     group = self.access(recordIndex)
@@ -176,7 +176,7 @@ def replaceRecord(self,index,record):
     self.startRecording()
     self.deleteRecord(index.internalPointer(),index.row())
     self.insertRecord(index.internalPointer(),record,index.row())
-    self.stopRecording()
+    self.endRecording()
 
 def moveinto(self,index,data):
     if type(data) is EPVGroup:

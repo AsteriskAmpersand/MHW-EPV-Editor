@@ -92,8 +92,8 @@ class FindDialog(QDialog):
                     self.accept()
                     return
                 else:
-                    if self.fakeNext is None:
-                        self.fakeNext = file,imatch
+                    if fakeNext is None:
+                        fakeNext = file,imatch
         self.results = fakeNext
         self.accept()  
         return 
