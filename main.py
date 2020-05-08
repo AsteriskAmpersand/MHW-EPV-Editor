@@ -42,12 +42,11 @@ class clipboard():
         self.data = value
         
 def tryWrap(func):
-    def functor(*args,**kwargs):#
-        try:
-            func(*(args[:len(signature(func).parameters)]),**kwargs)
-        except Exception as e:
-            print(e)
-            pass
+    def functor(self,*args,**kwargs):
+        if self.ui.fileTabs.currentIndex() == -1:
+            return
+        argCount = len(signature(func).parameters)-1
+        func(self,*(args[:argCount]),**kwargs)
     return functor
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -123,14 +122,14 @@ class MainWindow(QtWidgets.QMainWindow):
 # =============================================================================
 # File Operations
 # =============================================================================
-    @tryWrap
+
     def openFile(self,filename):
         tab = EPVTab(self,filename)
         self.ui.fileTabs.addTab(tab,filename.stem)
         self.ui.fileTabs.setCurrentWidget(tab)
         tab.tabNameChanged.connect(self.renameTab)        
         #self.enableMenus()
-    @tryWrap
+
     def open(self):
         filename = QFileDialog.getOpenFileName(self,_translate("MainWindow","Open EPV3"),"",_translate("MainWindow","MHW EPV3 (*.epv3)"))
         if filename[0]:
@@ -141,7 +140,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 QtWidgets.QMessageBox.critical(None,
                        "File not found",
                        "File {} not found.".format(str(filename)))      
-    @tryWrap
+
     def new(self):
         tab = EPVTab(self)
         self.ui.fileTabs.addTab(tab,"New EPV3")
@@ -233,10 +232,10 @@ class MainWindow(QtWidgets.QMainWindow):
 # =============================================================================
 # Scripting Block
 # =============================================================================
-    @tryWrap
+
     def loadVarDict(self):
         return {"files":MSE.files,"current":MSE.current,"open":MSE.openFile}
-    @tryWrap
+
     def loadInteractive(self):
         __qbox__ = QMessageBox()
         __qbox__.setText("Warning about loading Scripting:")
@@ -250,7 +249,7 @@ class MainWindow(QtWidgets.QMainWindow):
             MSE.interactiveMode(self.loadVarDict())
             MSE.stop()
         return
-    @tryWrap
+
     def loadScript(self):
         __filepath__ = QFileDialog.getOpenFileName(
                 self,_translate("MainWindow","Load Script"),
@@ -270,7 +269,7 @@ class MainWindow(QtWidgets.QMainWindow):
             exec(open(__filepath__,"r").read(),{},self.loadVarDict())
             MSE.stop()
         return
-    @tryWrap
+
     def invalidateCaches(self):
         for tab in [self.ui.fileTabs.widget(i) for i in range(self.ui.fileTabs.count())]:
             tab.invalidateCaches()

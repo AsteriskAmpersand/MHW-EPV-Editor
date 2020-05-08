@@ -51,7 +51,7 @@ class EPVCEntry(RecordProperties):
     properties = ["efxslot","color","alpha","saturation","frequency","size"]
     
     def paletteChange(self):
-        color = QColorDialog.getColor(QColor("#%X%X%X"%self.color))
+        color = QColorDialog.getColor(QColor("#%02X%02X%02X"%self.color))
         if color.isValid():
             self.color = color.red(),color.green(),color.blue()
             self.ui.color.valueChanged.emit("color")

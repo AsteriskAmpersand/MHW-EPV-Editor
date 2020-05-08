@@ -316,6 +316,8 @@ class EPVTab(QtWidgets.QWidget):
         clipboard.set(self.getEntry(ix))
     @defaultIfClipboard
     def pasteProperties(self,clipboard,ix):
+        if not ix.isValid():
+            return
         self.getEntry(ix).pasteProperties(clipboard.get())
     @defaultIfClipboard
     def pushStack(self,mainCopyStack,ix):
