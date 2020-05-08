@@ -19,10 +19,10 @@ from pathlib import Path
 from collections import OrderedDict
 
 epvc = Struct(
-        "efxslot" / uint32 *"uint",#0
+        "efxslot" / int32 *"int",#0
         "hexcolor" / ubyte[4] *"ubyte[4]",#255 255 255 255
         "saturation" / float32 *"float",#1
-        "size" / uint32 *"uint",#1
+        "size" / int32 *"int",#1
         "frequency" / float32 *"float",#1
         )
 

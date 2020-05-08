@@ -17,6 +17,7 @@ from PyQt5.QtWidgets import QDialog, QApplication, QAbstractItemView,QMessageBox
 from PyQt5.QtCore import Qt,QCoreApplication,QModelIndex
 from PyQt5.QtGui import QKeySequence 
 
+"""
 def catch_exceptions(t, val, tb):
     QMessageBox.critical(None,
                        "An exception was raised",
@@ -30,6 +31,7 @@ sys.excepthook = catch_exceptions
 test = lambda x:         QMessageBox.critical(None,
                            "Test",
                            "Test%d"%x)
+"""
 
 class CustomizeReplacement(QDialog):
     def __init__(self, baseReplacements, *args):

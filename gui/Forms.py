@@ -32,7 +32,7 @@ def SelectForm(propertyName, propertyType,parent=None):
     args = {"byte":{"setMinimum":-128,"setMaximum":127},
             "ubyte":{"setMinimum":0,"setMaximum":255,"setValue":0},
             "short":{"setMinimum":-(2**15),"setMaximum":2**15-1},
-            "int":{"setMinimum":-(2**31-1),"setMaximum":2**31-1},
+            "int":{"setMinimum":-(2**31-1)-1,"setMaximum":2**31-1},
             "uint":{"setMinimum":0,"setMaximum":(2**32-1)},
             "float":{"setDecimals":3,"setSingleStep":.001},
             }

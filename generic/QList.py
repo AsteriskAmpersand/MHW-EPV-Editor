@@ -10,6 +10,7 @@ from generic.UndoRedoController import InvertingUndoRedoController
 
 from PyQt5.QtWidgets import QDialog, QApplication, QAbstractItemView,QMessageBox
 
+"""
 import sys
 def catch_exceptions(t, val, tb):
     QMessageBox.critical(None,
@@ -20,6 +21,7 @@ def catch_exceptions(t, val, tb):
 
 old_hook = sys.excepthook
 sys.excepthook = catch_exceptions
+"""
 
 def iterable(ob):
     try:

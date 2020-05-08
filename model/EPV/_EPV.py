@@ -15,6 +15,7 @@ from ._EPVRecord import EPVRecord
 from PyQt5 import QtCore,QtWidgets
 import sys
 
+"""
 def catch_exceptions(t, val, tb):
     QtWidgets.QMessageBox.critical(None,
                                    "An exception was raised",
@@ -23,7 +24,8 @@ def catch_exceptions(t, val, tb):
 
 old_hook = sys.excepthook
 sys.excepthook = catch_exceptions
-    
+"""
+ 
 class EPV(QtCore.QAbstractItemModel):
     idEdited = QtCore.pyqtSignal(object)
     epvEdited = QtCore.pyqtSignal(object,int)
@@ -74,9 +76,9 @@ class EPV(QtCore.QAbstractItemModel):
     
     def serialize(self):
         header = {"signature":self.signature}
-        blocks = {"count":len(self.children),"blocks":sum(map(lambda x: x.blockSerialize(),self.children),[])}
+        blocks = {"count":len(self.children),"blocks":list(map(lambda x: x.blockSerialize(),self.children))}
         trails = []
-        for gix,group in enumerate(self.blocks):
+        for gix,group in enumerate(self.children):
             for rix,record in enumerate(group):
                 trails.append({"blockID":gix,"recordID":rix,"trailID":record.trailID})
         trail = {"padding":0,"trailCount":sum((len(c) for c in self.children)),

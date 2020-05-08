@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(296, 40)
+        Form.resize(296, 41)
         Form.setMinimumSize(QtCore.QSize(0, 40))
         Form.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.horizontalLayout = QtWidgets.QHBoxLayout(Form)
@@ -77,9 +77,9 @@ class Ui_Form(object):
         self.label_4.setObjectName("label_4")
         self.verticalLayout_4.addWidget(self.label_4)
         self.size = QtWidgets.QSpinBox(Form)
-        self.size.setMinimum(-999)
-        self.size.setMaximum(999)
-        self.size.setProperty("value", 1)
+        self.size.setMinimum(-2147483648)
+        self.size.setMaximum(2147483647)
+        self.size.setProperty("value", 0)
         self.size.setObjectName("size")
         self.verticalLayout_4.addWidget(self.size)
         self.horizontalLayout.addLayout(self.verticalLayout_4)

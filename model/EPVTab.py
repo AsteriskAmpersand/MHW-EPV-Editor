@@ -22,10 +22,7 @@ from PyQt5.QtWidgets import QFileDialog, QApplication,QAction,QMenu
 from PyQt5.QtCore import QModelIndex, pyqtSignal, Qt, QCoreApplication
 _translate = QCoreApplication.translate
 
-def functionChain(functionList):
-    for function in functionList:
-        function()
-        
+"""       
 import sys 
 def catch_exceptions(t, val, tb):
     QtWidgets.QMessageBox.critical(None,
@@ -36,6 +33,7 @@ def catch_exceptions(t, val, tb):
 
 old_hook = sys.excepthook
 sys.excepthook = catch_exceptions
+"""
 
 def defaultIfNone(function):
     def composite(self,*args):
@@ -364,7 +362,10 @@ class EPVTab(QtWidgets.QWidget):
         
     def SaveToFile(self,path):
         with open(path,"wb") as outf:
-            outf.write(self.EPVModel.serialize())
+            #print(path)
+            data = self.EPVModel.serialize()
+            #print(data)
+            outf.write(data)
         return
     def SaveAs(self):
         root = ""
@@ -373,11 +374,10 @@ class EPVTab(QtWidgets.QWidget):
         filename = QFileDialog.getSaveFileName(self,_translate("EPVTab","Save EPV3"),root,_translate("EPVTab","MHW EPV3 (*.epv3)"))
         if filename[0]:
             filename = Path(filename[0])
-            if filename.exists():
-                self.SaveToFile(filename)
-                self.path = filename
-                self.tabNameChanged(self,Path(self.path).stem)
-                return True
+            self.SaveToFile(filename)
+            self.path = filename
+            self.tabNameChanged.emit(self,Path(self.path).stem)
+            return True
         return False    
     def Save(self):
         if not self.path:

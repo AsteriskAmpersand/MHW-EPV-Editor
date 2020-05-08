@@ -8,6 +8,7 @@ Created on Wed Apr 22 16:13:03 2020
 import sys
 import os
 from pathlib import Path
+from inspect import signature
 
 from gui.Main import Ui_MainWindow
 from model.EPVTab import EPVTab
@@ -20,7 +21,7 @@ from splash.Splash import SplashScreen
 
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtGui import QPalette, QColor, QDesktopServices
-from PyQt5.QtWidgets import QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QFileDialog, QMessageBox,QApplication
 from PyQt5.QtCore import QUrl
 _translate = QtCore.QCoreApplication.translate
 
@@ -34,11 +35,20 @@ class clipboard():
     def __init__(self):
         self.data = None
     def __bool__(self):
-        return self.data
+        return bool(self.data)
     def get(self):
         return self.data
     def set(self,value):
         self.data = value
+        
+def tryWrap(func):
+    def functor(*args,**kwargs):#
+        try:
+            func(*(args[:len(signature(func).parameters)]),**kwargs)
+        except Exception as e:
+            print(e)
+            pass
+    return functor
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, arguments):
@@ -113,12 +123,14 @@ class MainWindow(QtWidgets.QMainWindow):
 # =============================================================================
 # File Operations
 # =============================================================================
+    @tryWrap
     def openFile(self,filename):
         tab = EPVTab(self,filename)
         self.ui.fileTabs.addTab(tab,filename.stem)
         self.ui.fileTabs.setCurrentWidget(tab)
         tab.tabNameChanged.connect(self.renameTab)        
         #self.enableMenus()
+    @tryWrap
     def open(self):
         filename = QFileDialog.getOpenFileName(self,_translate("MainWindow","Open EPV3"),"",_translate("MainWindow","MHW EPV3 (*.epv3)"))
         if filename[0]:
@@ -129,20 +141,24 @@ class MainWindow(QtWidgets.QMainWindow):
                 QtWidgets.QMessageBox.critical(None,
                        "File not found",
                        "File {} not found.".format(str(filename)))      
+    @tryWrap
     def new(self):
         tab = EPVTab(self)
         self.ui.fileTabs.addTab(tab,"New EPV3")
         self.ui.fileTabs.setCurrentWidget(tab)
         tab.tabNameChanged.connect(self.renameTab)
         #self.enableMenus()
+    @tryWrap
     def save(self):
         ix = self.ui.fileTabs.currentIndex()
         tab = self.ui.fileTabs.widget(ix)
         tab.Save()
+    @tryWrap
     def saveAs(self):
         ix = self.ui.fileTabs.currentIndex()
         tab = self.ui.fileTabs.widget(ix)
         tab.SaveAs()
+    @tryWrap
     def saveAll(self):
         for tab in [self.ui.fileTabs.widget(i) for i in range(self.ui.fileTabs.count())]:
             tab.Save()
@@ -150,32 +166,44 @@ class MainWindow(QtWidgets.QMainWindow):
 # =============================================================================
 # Edit Block
 # =============================================================================
+    @tryWrap
     def undo(self):
         widget = self.ui.fileTabs.currentWidget()
         widget.undo()
+    @tryWrap
     def redo(self):
         widget = self.ui.fileTabs.currentWidget()
         widget.redo()
-        
+    @tryWrap        
     def delete(self):self.currentWidget().delete()
+    @tryWrap
     def duplicate(self):self.currentWidget().duplicate()
+    @tryWrap
     def copy(self):self.currentWidget().copy()
+    @tryWrap
     def paste(self):self.currentWidget().paste()
+    @tryWrap
     def copyProperties(self):self.currentWidget().copyProperties(self.propertyClipboard)
+    @tryWrap
     def pasteProperties(self):
         if self.propertyClipboard: 
             self.currentWidget().pasteProperties(self.propertyClipboard)
+    @tryWrap
     def pushStack(self):self.currentWidget().pushStack(self.copyStack)
+    @tryWrap
     def pasteStack(self):self.currentWidget().pasteStack(self.copyStack)
+    @tryWrap
     def clearStack(self):
         self.copyStack.clear()
+    @tryWrap
     def newGroup(self):self.currentWidget().newGroup()
+    @tryWrap
     def newRecord(self):self.currentWidget().newRecord()
       
 # =============================================================================
 # Find Block
 # =============================================================================
-    
+    #@tryWrap
     def Find(self):
         if self.ui.fileTabs.currentIndex() == -1:
             return
@@ -185,7 +213,7 @@ class MainWindow(QtWidgets.QMainWindow):
             file,metaIndex = findDialog.results
             self.ui.fileTabs.setCurrentWidget(file)
             file.setCurrentIndex(metaIndex.index)
-            
+    #@tryWrap
     def Replace(self):
         if self.ui.fileTabs.currentIndex() == -1:
             return
@@ -195,21 +223,20 @@ class MainWindow(QtWidgets.QMainWindow):
             replacements = replacementDialog.results
             for file in replacements:
                 file.replace(replacements[file])
-    def BatchReplace(self):
-        if not self.ui.fileTabs.currentIndex() == -1:
-            return
+    #@tryWrap        
     def getCurrentFile(self):
         return self.currentWidget()
+    #@tryWrap
     def getFiles(self):
         return [self.ui.fileTabs.widget(i) for i in range(self.ui.fileTabs.count())]
     
 # =============================================================================
 # Scripting Block
 # =============================================================================
-    
+    @tryWrap
     def loadVarDict(self):
         return {"files":MSE.files,"current":MSE.current,"open":MSE.openFile}
-    
+    @tryWrap
     def loadInteractive(self):
         __qbox__ = QMessageBox()
         __qbox__.setText("Warning about loading Scripting:")
@@ -223,7 +250,7 @@ class MainWindow(QtWidgets.QMainWindow):
             MSE.interactiveMode(self.loadVarDict())
             MSE.stop()
         return
-
+    @tryWrap
     def loadScript(self):
         __filepath__ = QFileDialog.getOpenFileName(
                 self,_translate("MainWindow","Load Script"),
@@ -243,7 +270,7 @@ class MainWindow(QtWidgets.QMainWindow):
             exec(open(__filepath__,"r").read(),{},self.loadVarDict())
             MSE.stop()
         return
-
+    @tryWrap
     def invalidateCaches(self):
         for tab in [self.ui.fileTabs.widget(i) for i in range(self.ui.fileTabs.count())]:
             tab.invalidateCaches()
@@ -253,10 +280,10 @@ class MainWindow(QtWidgets.QMainWindow):
 # =============================================================================
 # Help Block
 # =============================================================================
-        
+    @tryWrap
     def scriptingHelp(self):
         AboutScripting(self)
-    
+    @tryWrap
     def aboutHelp(self):
         QDesktopServices.openUrl(QUrl(r"https://github.com/Ezekial711/MonsterHunterWorldModding/wiki/Editing-EPV-Files"))
     
@@ -325,7 +352,7 @@ def setStyle(app):
 
 if __name__ == '__main__':
     #from pathlib import Path
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     args = app.arguments()[1:]
     splash = SplashScreen()
     response = splash.exec()

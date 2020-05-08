@@ -110,6 +110,8 @@ class ReplaceForm(QWidget):
         return results            
         
     def evaluate(self,reference):
+        if not reference:
+            return []
         #currentMode = self.ui.tabWidget.currentWidget()
         mode = {"Text":TEXT,"Color":COLOR}[self.ui.tabWidget.tabText(self.ui.tabWidget.currentIndex())]
         if mode == TEXT: return self.evaluateText(reference)

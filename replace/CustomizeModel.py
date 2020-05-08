@@ -18,6 +18,7 @@ ReplaceRole = 1+Qt.UserRole
 #ReplaceRole 
 #BasicTextEntry TextEntry ColorEntry RGBAColorEntry
 
+"""
 import sys 
 def catch_exceptions(t, val, tb):
     QMessageBox.critical(None,
@@ -28,6 +29,7 @@ def catch_exceptions(t, val, tb):
 
 old_hook = sys.excepthook
 sys.excepthook = catch_exceptions
+"""
 
 class ReplaceResultEntry():
     def __init__(self,file,dataIndex,replacementTarget):
