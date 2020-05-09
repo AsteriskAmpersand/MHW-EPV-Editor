@@ -137,11 +137,13 @@ def newGroup(self,groupIndex = None):
     
 def newRecord(self,recordIndex):
     if not recordIndex.isValid():
+        if len(self) == 0: return False
         recordIndex = self.index(len(self)-1,0,QModelIndex())
     if type(self.access(recordIndex)) is EPVRecord:
         recordIndex = recordIndex.parent()
     group = self.access(recordIndex)
     self.insertRecord(group,EPVRecord(group))
+    return True
     
 def _deleteRecord(self,group,position):
     index = self.createIndex(group.row(),0,group.parent())
@@ -225,7 +227,7 @@ def _dropData(self,target,data):
     return False
 
 def dropMimeData(self, mimeData, dropAction, row, col, parent):
-    print("%d - %d | %d %d %s"%(row,col,parent.row(),parent.column(),parent.internalPointer()))
+    #print("%d - %d | %d %d %s"%(row,col,parent.row(),parent.column(),parent.internalPointer()))
     if dropAction == Qt.IgnoreAction:
         return True
     if dropAction == Qt.MoveAction:

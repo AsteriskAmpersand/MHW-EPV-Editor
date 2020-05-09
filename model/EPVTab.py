@@ -116,25 +116,25 @@ class EPVTab(QtWidgets.QWidget):
         ix = view.indexAt(gp)
         record = [self.newRecord] if ix.row()!=-1 else []
         recordName = ["New Record"] if ix.row()!=-1 else []
-        for actionName,method in zip(["New Group"]+recordName+
-                                     ["Copy","Paste","Delete","Duplicate"],
-                         [self.newGroup]+record+
-                         [self.copy,self.paste,self.delete,self.duplicate]):
-            action = QAction(actionName,view)
-            action.triggered.connect(partial(method,(ix)))
-            menu.addAction(action)
+        
+        def setmenu(actionNames,methods,*args):
+            for actionName,method in zip(actionNames,methods):
+                action = QAction(actionName,view)
+                action.triggered.connect(partial(method,*args))
+                menu.addAction(action)
+                
+        setmenu(["New Group"]+recordName+["Paste"],[self.newGroup]+record+[self.paste],ix)
+        if ix.isValid():
+            setmenu(["Copy","Delete","Duplicate"],[self.copy,self.delete,self.duplicate],ix)
         clipboard = self.parentWidget().parentWidget().parentWidget().parentWidget().copyStack
         propclipboard = self.parentWidget().parentWidget().parentWidget().parentWidget().propertyClipboard
-        for actionName,method in zip(["Push to Copy Stack","Paste Copy Stack"],
-                                     [self.pushStack,self.pasteStack]):
-            action = QAction(actionName,view)
-            action.triggered.connect(partial(method,clipboard,ix))
-            menu.addAction(action)
-        for actionName,method in zip(["Copy Properties","Paste Properties"],
-                                     [self.copyProperties,self.pasteProperties]):
-            action = QAction(actionName,view)
-            action.triggered.connect(partial(method,propclipboard,ix))
-            menu.addAction(action)
+        if ix.isValid(): setmenu(["Push to Copy Stack"],[self.pushStack],clipboard,ix)
+        setmenu(["Paste Copy Stack"],[self.pasteStack],clipboard,ix)
+        if ix.isValid():
+            setmenu(["Copy Properties"],[self.copyProperties,self.pasteProperties],propclipboard,ix)
+            if propclipboard is not None and type(propclipboard) == type(self.EPVModel.access(ix)):
+                setmenu(["Paste Properties"],[self.pasteProperties],propclipboard,ix)
+
         action = menu.exec_(view.viewport().mapToGlobal(gp))
         #print(ix.row(),ix.column(),ix.internalPointer())
         
