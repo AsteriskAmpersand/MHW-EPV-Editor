@@ -10,7 +10,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
-        Dialog.setObjectName("Dialog")
+        Dialog.setObjectName("About Scripting")
         Dialog.resize(660, 723)
         Dialog.setMinimumSize(QtCore.QSize(660, 723))
         Dialog.setMaximumSize(QtCore.QSize(660, 723))

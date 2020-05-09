@@ -24,6 +24,7 @@ class ReplaceDialog(QDialog):
         
         self.ui = Ui_Dialog()
         self.ui.setupUi(self)
+        self.setWindowTitle("Find and Replace")
         
         self.connectSignals()        
         self.show()

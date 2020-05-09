@@ -23,6 +23,7 @@ class FindDialog(QDialog):
         
         self.ui = Ui_Dialog()
         self.ui.setupUi(self)
+        self.setWindowTitle("Find")
         self.ui.Matches.setEditTriggers(QAbstractItemView.NoEditTriggers)
         
         self.results = None

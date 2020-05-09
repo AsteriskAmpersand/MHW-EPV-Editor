@@ -42,6 +42,7 @@ class InteractiveConsole(QDialog):
 
         self.ui = Ui_Dialog()
         self.ui.setupUi(self)
+        self.setWindowTitle("Interactive Python Console")
         
         self.setFormating()
         

@@ -402,7 +402,19 @@ class EPVTab(QtWidgets.QWidget):
         if choice == QtWidgets.QMessageBox.No:
             return True
         
-if "__main__" in __name__:    
+# =============================================================================
+# Menu Bar Checks
+# =============================================================================
+            
+    def undoable(self):
+        return not self.undoStack.empty()
+    
+    def redoable(self):
+        return not self.redoStack.empty()
+    
+        
+if "__main__" in __name__:
+    import sys
     app = QtWidgets.QApplication(sys.argv)
     window = EPVTab(None, r"E:\MHW\chunkG0\wp\rod\epv\hm_wp10_01.epv3")
     sys.exit(app.exec_())

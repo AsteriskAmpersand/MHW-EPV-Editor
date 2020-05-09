@@ -114,11 +114,44 @@ class MainWindow(QtWidgets.QMainWindow):
         if not DEBUG:
             self.ui.menuDebug.setVisible(False)
             self.ui.menuDebug.menuAction().setVisible(False)
+            
+        #Enabling
+        self.ui.menubar.hovered.connect(self.menuBarConditions)
+        self.menuBarConditions(enable = False)
     
     def connectSignals(self):
         self.ui.fileTabs.tabCloseRequested.connect(self.closeTab)
         #connect changes in tab name
-        
+
+# =============================================================================
+# Menu Bar Checks
+# =============================================================================
+
+    def menuBarConditions(self,*args,enable = None):
+        #print(enable)
+        menus = [self.ui.menuEdit,self.ui.menuSearch,self.ui.menuScripting]
+        files = [self.ui.actionSave,self.ui.actionSave_All,self.ui.actionSave_As]
+        if enable is None:
+            enable = self.ui.fileTabs.currentIndex() != -1
+        if enable:
+            for m in menus:
+                m.setEnabled(True)
+            for f in files:
+                f.setEnabled(True)
+            if self.ui.fileTabs.currentWidget().undoable():
+                self.ui.actionUndo.setEnabled(True)
+            else:
+                self.ui.actionUndo.setEnabled(False)
+            if self.ui.fileTabs.currentWidget().redoable():
+                self.ui.actionRedo.setEnabled(True)
+            else:
+                self.ui.actionRedo.setEnabled(False)
+        else:
+            for m in menus:
+                m.setEnabled(False)
+            for f in files:
+                f.setEnabled(False)
+                
 # =============================================================================
 # File Operations
 # =============================================================================
@@ -127,25 +160,27 @@ class MainWindow(QtWidgets.QMainWindow):
         tab = EPVTab(self,filename)
         self.ui.fileTabs.addTab(tab,filename.stem)
         self.ui.fileTabs.setCurrentWidget(tab)
-        tab.tabNameChanged.connect(self.renameTab)        
+        tab.tabNameChanged.connect(self.renameTab)      
+        self.menuBarConditions(enable = True)
         #self.enableMenus()
 
     def open(self):
         filename = QFileDialog.getOpenFileName(self,_translate("MainWindow","Open EPV3"),"",_translate("MainWindow","MHW EPV3 (*.epv3)"))
         if filename[0]:
             filename = Path(filename[0])
-            if filename.exists():
+            try:                
                 self.openFile(filename)
-            else:
-                QtWidgets.QMessageBox.critical(None,
-                       "File not found",
-                       "File {} not found.".format(str(filename)))      
+            except:
+                QtWidgets.QMessageBox.critical(self,
+                       "Open Failed.",
+                       "Could not open {}. File is either not the correct format or corrupted.".format(str(filename)))      
 
     def new(self):
         tab = EPVTab(self)
         self.ui.fileTabs.addTab(tab,"New EPV3")
         self.ui.fileTabs.setCurrentWidget(tab)
         tab.tabNameChanged.connect(self.renameTab)
+        self.menuBarConditions(enable = True)
         #self.enableMenus()
     @tryWrap
     def save(self):
@@ -279,10 +314,10 @@ class MainWindow(QtWidgets.QMainWindow):
 # =============================================================================
 # Help Block
 # =============================================================================
-    @tryWrap
+
     def scriptingHelp(self):
         AboutScripting(self)
-    @tryWrap
+
     def aboutHelp(self):
         QDesktopServices.openUrl(QUrl(r"https://github.com/Ezekial711/MonsterHunterWorldModding/wiki/Editing-EPV-Files"))
     
@@ -304,6 +339,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if tab.RequestSave():
             tab.tabNameChanged.disconnect(self.renameTab)
             self.ui.fileTabs.removeTab(ix)
+        self.menuBarConditions()
     def renameTab(self,tab,name):
         ix = self.ui.fileTabs.indexOf(tab)
         self.ui.fileTabs.setTabText(ix,name)

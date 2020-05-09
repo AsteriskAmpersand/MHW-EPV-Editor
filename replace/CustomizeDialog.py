@@ -40,6 +40,7 @@ class CustomizeReplacement(QDialog):
         
         self.ui = Ui_Dialog()
         self.ui.setupUi(self)
+        self.setWindowTitle("Customize Replacements")
         self.ui.Before.setModel(self.model)
         self.ui.After.setModel(self.model)
         self.connectSignals()
