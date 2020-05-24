@@ -363,12 +363,16 @@ class EPVTab(QtWidgets.QWidget):
         self.ui.recordBrowser.setCurrentIndex(self.EPVModel.index(current.row()+1,current.column(),current.parent()))
         
     def SaveToFile(self,path):
-        with open(path,"wb") as outf:
-            #print(path)
-            data = self.EPVModel.serialize()
-            #print(data)
-            outf.write(data)
-        return
+        try:
+            with open(path,"wb") as outf:
+                #print(path)
+                data = self.EPVModel.serialize()
+                #print(data)
+                outf.write(data)
+        except Exception as e:
+            #print(e)
+            return False
+        return True
     def SaveAs(self):
         root = ""
         if self.path:
@@ -376,7 +380,8 @@ class EPVTab(QtWidgets.QWidget):
         filename = QFileDialog.getSaveFileName(self,_translate("EPVTab","Save EPV3"),root,_translate("EPVTab","MHW EPV3 (*.epv3)"))
         if filename[0]:
             filename = Path(filename[0])
-            self.SaveToFile(filename)
+            success = self.SaveToFile(filename)
+            if not success: return False
             self.path = filename
             self.tabNameChanged.emit(self,Path(self.path).stem)
             return True
@@ -385,8 +390,7 @@ class EPVTab(QtWidgets.QWidget):
         if not self.path:
             return self.SaveAs()
         else:
-            self.SaveToFile(self.path)
-            return True
+            return self.SaveToFile(self.path)
             
     def RequestSave(self):
         if not self.changed:

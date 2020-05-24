@@ -235,7 +235,7 @@ class Ui_Dialog(object):
         self.label_8.setText(_translate("Dialog", "Properties"))
         self.label_9.setText(_translate("Dialog", "Group"))
         self.label_10.setText(_translate("Dialog", "Record"))
-        self.label_11.setText(_translate("Dialog", "paths:string[4]\n"
+        self.label_11.setText(_translate("Dialog", "pathX:string (X = 0 to 3)\n"
 "padding:int\n"
 "unknownID:int\n"
 "recordID:ushort\n"

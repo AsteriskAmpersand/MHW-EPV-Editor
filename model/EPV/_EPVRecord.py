@@ -30,8 +30,7 @@ class EPVRecord():
             self.trailID = trailID
             for prop in EPVExtraneousProperties:
                 setattr(self,prop,objectType(EPVExtraneousProperties[prop])(getattr(record,prop)))
-        self.__parent__ = parent
-    
+        self.__parent__ = parent    
     def setParent(self,newParent):
         self.__parent__=newParent
     def serialize(self):

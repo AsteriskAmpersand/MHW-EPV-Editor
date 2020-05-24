@@ -35,7 +35,7 @@ class __ScriptMiniEngine__():
     def files(self):
         return self.files
     def current(self):
-        return self.files[self.app.ui.fileTabs.currentWidget()]
+        return self.files[self.app.ui.fileTabs.currentIndex()]
     def interactiveMode(self,varDict):
         interactiveConsole = InteractiveConsole(varDict)
         interactiveConsole.exec()
@@ -61,7 +61,9 @@ class ScriptMetaClass():
         self.parent = parent
         if primitive is None:
             if self.primitiveType is not None:
-                self.primitiveType(self.parent)
+                primitive = self.primitiveType(self.parent)
+            else:
+                raise TypeError("Missing Primitive Type from Class")            
         setattr(self,self.primitiveName,primitive)
         setattr(self,self.subcontainerName,
                 [self.childrenType(self,subelement) for subelement in primitive])
@@ -159,7 +161,8 @@ class ScriptRecord(ScriptMetaClass):
     primitiveName="record"
     primitiveType = EPVRecord
     childrenType = ScriptEPVC
-    properties = {"paths":"packed_path",**{prop.name:prop.name for prop in record.subcons if "parameterBlock" not in prop.name}}
+    properties = {"path0":"path0","path1":"path1","path2":"path2","path3":"path3",
+                  **{prop.name:prop.name for prop in record.subcons if "parameterBlock" not in prop.name}}
     
     EFXS = ScriptMetaClass.Subcontainer
     AddSubelement = ScriptMetaClass.unimplemented
@@ -176,7 +179,7 @@ class ScriptRecord(ScriptMetaClass):
         elif prop in self.pb2:
             return getattr(self,self.primitiveName).parameterBlock2.__getattr__(self.properties[prop])
         else:
-            return super().GetProperty(self,prop)
+            return super().GetProperty(prop)
     def SetProperty(self,prop,value):
         if prop in self.pb1:
             mse.UndoRedoController.recordEvent(self.SetProperty,(prop,self.GetProperty(prop)))
@@ -185,7 +188,7 @@ class ScriptRecord(ScriptMetaClass):
             mse.UndoRedoController.recordEvent(self.SetProperty,(prop,self.GetProperty(prop)))
             setattr(getattr(self,self.primitiveName).parameterBlock2,self.properties[prop],value)
         else:
-            super().SetProperty(self,prop,value)
+            super().SetProperty(prop,value)
     
 class ScriptGroup(ScriptMetaClass):
     subcontainerName = "records"
@@ -195,9 +198,9 @@ class ScriptGroup(ScriptMetaClass):
     properties = {"groupID":"groupID"}
     
     def insertOperation(self,subelement,position):
-        self.epv._insertRecord(self.group,subelement.record,position)
+        self.group.__insertRecord__(subelement.record,position)
     def removeOperation(self,position):
-        self.epv._removeRecord(self.group,position)
+        self.group.__removeRecord__(position)
     
     Records = ScriptMetaClass.Subcontainer
     AddRecord = ScriptMetaClass.AddSubelement

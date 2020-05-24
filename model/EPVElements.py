@@ -35,6 +35,13 @@ class EPVC():
     @color.setter
     def color(self,value):
         self.r,self.g,self.b = value
+        
+    @property
+    def hexcolor(self):
+        return (*self.color,self.alpha)
+    @hexcolor.setter
+    def hexcolor(self,value):
+        self.color,self.a = value[:-1],value[-1]
 
 def emptyProp(propertyType):
     if "[" in propertyType:

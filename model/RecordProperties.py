@@ -8,8 +8,6 @@ from PyQt5.QtWidgets import QWidget
 from PyQt5 import QtCore
 from generic.Queue import Queue,Stack
 
-
-
 class RecordProperties(QWidget):
     undoableAction = QtCore.pyqtSignal(object)
     def __init__(self,parent=None):

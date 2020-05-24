@@ -14,7 +14,7 @@ from gui.Main import Ui_MainWindow
 from model.EPVTab import EPVTab
 from model.AboutScripting import AboutScripting
 from generic.Queue import CopyStack
-from scripting.scriptEngine import mse as MSE
+from scripting.scriptEngine import mse as MSE, ScriptGroup, ScriptRecord
 from replace.ReplaceDialog import ReplaceDialog
 from replace.FindDialog import FindDialog
 from splash.Splash import SplashScreen
@@ -269,7 +269,9 @@ class MainWindow(QtWidgets.QMainWindow):
 # =============================================================================
 
     def loadVarDict(self):
-        return {"files":MSE.files,"current":MSE.current,"open":MSE.openFile}
+        return {"files":MSE.files,"current":MSE.current,"open":MSE.openFile,
+                "ScriptGroup":ScriptGroup,"ScriptRecord":ScriptRecord
+                }
 
     def loadInteractive(self):
         __qbox__ = QMessageBox()

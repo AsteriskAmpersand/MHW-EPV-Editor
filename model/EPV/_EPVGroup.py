@@ -67,6 +67,19 @@ class EPVGroup(QList):
     @staticmethod
     def fromExtendedBinary(binaryData):return EPVGroup.fromBinary(binaryData,binaryExtendedGroup)
     def insertRecord(self,record,pos):self.__parent__.insertRecord(self,record,pos)
+    
+    def __deleteRecord__(self,position):
+        self[position:position+1] = []
+        return True
+    
+    def __insertRecord__(self,record,position = None):
+        if position is None:
+            position = len(self)
+        record.setParent(self)
+        self[position:position] = [record]
+        return True
+
+
     def duplicate(self):
         self.__parent__.insertGroup(deepcopy(self),self.row()+1)
     def pasteProperties(self,clipboardObject):

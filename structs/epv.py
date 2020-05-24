@@ -30,8 +30,10 @@ parameterBlock1 = Struct(
     "paramU0" / int32[3] *"int[3]",#[1, 0, 0] normally
     "paramU1" / float32 *"float",#0 normally
     "paramU2" / int32[4] *"int[4]",#[0, 0, 1, 120] normally
-    "paramU3" / short[4] *"short[4]",#[-1, -1, -1, -1] normally
-    "paramU4" / int32[2] *"int[2]",#[0, 0] normally
+    "EFXSubIndex" / short[2] *"short[2]",#[-1, -1, -1, -1] normally
+    "paramU3" / short[2] *"short[2]",#[-1, -1, -1, -1] normally
+    "EFXSubIndex2" / short[2] *"short[2]",
+    "paramU4" / short[2] *"short[2]",#[0, 0] normally
 )
 
 parameterBlock2 = Struct(
@@ -58,7 +60,7 @@ record = Struct(
     "rotationJitter" / float32[3] *"float[3]",#[0,0,0] normally
     "paramW3"/ int32[2] *"int[2]",# normally 0,0 or 5,4 or 4,4
     "boneID" / int32 *"int",#tends to be -1
-    "paramW4" / int32[3] *"int[3]",#confirmeed cursed shit, tends to be [0,0,-1]
+    "paramW4" / int32[3] *"int[3]",#confirmed cursed shit, tends to be [0,0,-1]
     "epvColor" / epvc[8] *"epvc[8]",
     "paramW5" / float32[2] *"float[2]",#tends to be [1,0]
     "parameterBlock2" / parameterBlock2 *"parameterBlock2",
@@ -68,15 +70,20 @@ record = Struct(
 extendedRecord = record + Struct("trailID" / int32,)
 
 EPVExtraneousProperties = OrderedDict([(i.name,i.docs) for i in record.subcons if i.name not in ["packed_path","recordID","epvColor","boneID"]])
+def propDefault(prop,doc = None):
+    if doc is None:
+        doc = prop.docs
+    return [0]*int(doc.split("[")[1].replace("]","")) if "[" in doc else 0
+    
 class parameterBlockDefault():
     def __init__(self):
         for prop in self.struct.subcons:
-            setattr(self,prop.name,0)
+            setattr(self,prop.name, propDefault(prop))
 class parameterBlock1Default(parameterBlockDefault):
     struct = parameterBlock1
 class parameterBlock2Default(parameterBlockDefault):
     struct = parameterBlock2   
-EPVExtraneousDefaults = OrderedDict([(prop,0) for prop in EPVExtraneousProperties if "parameterBlock" not in prop] + 
+EPVExtraneousDefaults = OrderedDict([(prop,propDefault(prop,EPVExtraneousProperties[prop])) for prop in EPVExtraneousProperties if "parameterBlock" not in prop] + 
                                     [("parameterBlock1",parameterBlock1Default()),
                                      ("parameterBlock2",parameterBlock2Default())])
 

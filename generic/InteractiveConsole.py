@@ -74,6 +74,8 @@ class InteractiveConsole(QDialog):
                 exec(text,{},self.locals)
             self.displayOutput(text,results.getvalue())
         except Exception as error:
+            #print(error)
+            #raise error
             self.displayError(text,str(error.with_traceback(error.__traceback__))+"\n")
         self.ui.Input.setText("")
         

@@ -34,7 +34,8 @@ def SelectForm(propertyName, propertyType,parent=None):
             "short":{"setMinimum":-(2**15),"setMaximum":2**15-1},
             "int":{"setMinimum":-(2**31-1)-1,"setMaximum":2**31-1},
             "uint":{"setMinimum":0,"setMaximum":(2**32-1)},
-            "float":{"setDecimals":3,"setSingleStep":.001},
+            "float":{"setDecimals":3,"setSingleStep":.001,
+                     "setMinimum":-999999999,"setMaximum":999999999},
             }
     widget = PropertyWidget(count,form[typing],propertyName,parent,**args[typing])
     return widget
